@@ -1,12 +1,13 @@
 /* =========================================================
  * 全局排行榜（leaderboard.js）
- * 读写走 uniCloud 阿里云版 云函数 URL化接口（api.next.bspapp.com），
- * 数据存于 uniCloud 云数据库，无需任何 token / 密钥。
+ * 读写走自托管后端（本机 Node + cpolar 内网穿透），
+ * 数据存于你电脑本地磁盘，无需任何 token / 密钥。
+ * 注意：cpolar 免费版重启后域名会变，变了改这里即可。
  * ========================================================= */
 (function () {
   "use strict";
 
-  const API_BASE = "https://api.next.bspapp.com/leaderboard";
+  const API_BASE = "https://1135bfad.r38.cpolar.top/leaderboard";
 
   /* 读取某首歌的前十 */
   async function fetchTop(songId) {
