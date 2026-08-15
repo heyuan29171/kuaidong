@@ -95,13 +95,15 @@
         bestTxt +
         '<div class="ops">' +
         '<button class="btn primary" data-act="play">游玩</button>' +
-        '<button class="btn" data-act="rank">排行榜</button>' +
-        '<button class="btn" data-act="edit">编辑谱面</button>' +
+        (isCustom ? "" : '<button class="btn" data-act="rank">排行榜</button>') +
+        (isCustom ? '<button class="btn" data-act="edit">编辑谱面</button>' : "") +
         "</div>" +
         (isCustom ? '<button class="del" data-act="del" title="删除">×</button>' : "");
       card.querySelector('[data-act="play"]').addEventListener("click", () => playSong(s));
-      card.querySelector('[data-act="rank"]').addEventListener("click", () => openRank(s));
-      card.querySelector('[data-act="edit"]').addEventListener("click", () => editSong(s));
+      const rankBtn = card.querySelector('[data-act="rank"]');
+      if (rankBtn) rankBtn.addEventListener("click", () => openRank(s));
+      const editBtn = card.querySelector('[data-act="edit"]');
+      if (editBtn) editBtn.addEventListener("click", () => editSong(s));
       if (isCustom) {
         card.querySelector('[data-act="del"]').addEventListener("click", () => {
           if (confirm("删除《" + s.title + "》？")) {
@@ -139,6 +141,10 @@
   }
 
   function editSong(song) {
+    if (song.source === "synth") {
+      alert("内置曲目谱面为固定内容，不可编辑。只能编辑自定义曲目。");
+      return;
+    }
     Editor.open(song);
     showView("editor");
   }

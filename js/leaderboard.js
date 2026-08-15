@@ -41,9 +41,10 @@
     }
   }
 
-  /* 结算后调用：是否进前十，进则弹窗让玩家输 ID 上榜 */
+  /* 结算后调用：是否进前十，进则弹窗让玩家输 ID 上榜（仅内置曲目参与排行榜，自制的歌不上榜） */
   async function maybeSubmit(song, result) {
     if (!song || !result || result.score <= 0) return;
+    if (song.source !== "synth") return;
     try {
       const top = await fetchTop(song.id);
       const threshold = top.length < 10 ? 0 : top[top.length - 1].score;
