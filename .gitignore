@@ -1,6 +1,9 @@
 # 用户数据：成绩、自编曲、上传的 BGM 存档——绝不提交到 git
 cundang/
 
+# 排行榜 Token 配置——含敏感凭据，绝不提交到 git
+js/leaderboard-config.js
+
 # 系统文件
 .DS_Store
 Thumbs.db

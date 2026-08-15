@@ -7,13 +7,14 @@
  *   1. 在本仓库创建 leaderboard/ 目录（放一个占位文件即可）
  *   2. 在 GitHub 生成 fine-grained token，仅授予本仓库的
  *      Contents 读写权限（GitHub 只支持仓库级限制，不支持路径级）
- *   3. 把 TOKEN 填到下面
+ *   3. 把 Token 填到 js/leaderboard-config.js（该文件已被 .gitignore
+ *      排除，绝不会上传到仓库）
  * 详见 README「全局排行榜」一节。
  * ========================================================= */
 (function () {
   "use strict";
 
-  const TOKEN = "";   // ← 在此填入 fine-grained token（留空则排行榜功能禁用）
+  const TOKEN = (window.LEADERBOARD_CONFIG && window.LEADERBOARD_CONFIG.token) || "";
   const OWNER = "heyuan29171";
   const REPO = "kuaidong";
   const BRANCH = "main";

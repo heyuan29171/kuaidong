@@ -18,10 +18,10 @@
 
 1. 在 GitHub 打开仓库 → Settings → Developer settings → **Fine-grained personal access tokens** → Generate new token
 2. 只勾选本仓库（kuaidong），Repository permissions → Contents → **Read and write**
-3. 生成后把 Token 填入 `js/leaderboard.js` 顶部的 `TOKEN = ""`（Token 只限到这一个仓库，改动不了你的其他仓库）
-4. 提交代码后排行榜即生效；Token 留空时排行榜自动禁用，不影响游玩
+3. 把 `js/leaderboard-config.example.js` 复制一份为 `js/leaderboard-config.js`，将 Token 填入其中的 `token: ""`
+4. `js/leaderboard-config.js` 已被 `.gitignore` 排除，**Token 永远不会被提交到仓库**；Token 留空时排行榜自动禁用，不影响游玩
 
-> 注意：`TOKEN` 是敏感信息，请勿提交到公开仓库（如要在线启用，建议配合 GitHub Actions Secret 做注入，或使用自己的只读代理）。
+> 注意：因为配置文件不进仓库，线上 GitHub Pages 版本不会带 Token，排行榜仅在本地打开时可用。若要在线上启用，请配合 GitHub Actions Secret 注入（把配置文件内容在部署时生成），或改用自己的只读代理。
 
 ## 谱面编辑器
 
