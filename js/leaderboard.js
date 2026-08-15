@@ -1,8 +1,7 @@
 /* =========================================================
  * 全局排行榜（leaderboard.js）
  * 读写全部走 Cloudflare Pages Functions 代理（/api/leaderboard），
- * GitHub token 只存在于服务端环境变量，浏览器端不接触 token。
- * 排行榜数据存于仓库 leaderboard/<songId>.json（每首歌前十）。
+ * 数据存于 Cloudflare KV，无任何 token / 密钥，浏览器端不接触凭据。
  * ========================================================= */
 (function () {
   "use strict";

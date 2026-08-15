@@ -2,18 +2,11 @@
  * 全局排行榜代理接口（Cloudflare Pages Functions）
  * 路由：GET  /api/leaderboard?song=<songId>   读取某首歌前十
  *       POST /api/leaderboard                 提交一条成绩
- * 服务端持有 GitHub fine-grained token（环境变量 GH_TOKEN），
- * 浏览器端永远接触不到 token。
+ * 数据存于 Cloudflare KV（无 GitHub token、无任何密钥）。
+ * 浏览器端只调用本接口，不接触任何凭据。
+ * 绑定要求：Pages 项目 → Settings → Bindings → KV namespace，
+ *           变量名必须是 LB
  * ========================================================= */
-const OWNER = "heyuan29171";
-const REPO = "kuaidong";
-const BRANCH = "main";
-const API = "https://api.github.com/repos/" + OWNER + "/" + REPO;
-const RAW = "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/" + BRANCH + "/leaderboard";
-
-function pathOf(songId) {
-  return "leaderboard/" + encodeURIComponent(songId) + ".json";
-}
 
 function json(data, status) {
   return new Response(JSON.stringify(data), {
@@ -22,34 +15,14 @@ function json(data, status) {
   });
 }
 
-function b64(str) {
-  const bytes = new TextEncoder().encode(str);
-  let bin = "";
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return btoa(bin);
-}
-
-async function readTop(songId) {
+async function readTop(env, songId) {
   try {
-    const res = await fetch(RAW + "/" + encodeURIComponent(songId) + ".json");
-    if (!res.ok) return [];
-    const j = await res.json();
+    const raw = await env.LB.get(songId);
+    if (!raw) return [];
+    const j = JSON.parse(raw);
     return Array.isArray(j.scores) ? j.scores : [];
   } catch (e) {
     return [];
-  }
-}
-
-async function getSha(path, token) {
-  try {
-    const res = await fetch(API + "/contents/" + path, {
-      headers: { Authorization: "Bearer " + token },
-    });
-    if (!res.ok) return null;
-    const j = await res.json();
-    return j.sha || null;
-  } catch (e) {
-    return null;
   }
 }
 
@@ -57,15 +30,12 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const songId = url.searchParams.get("song");
   if (!songId) return json({ ok: false, reason: "missing-song" }, 400);
-  const scores = await readTop(songId);
+  const scores = await readTop(context.env, songId);
   return json({ ok: true, scores: scores });
 }
 
 export async function onRequestPost(context) {
   const env = context.env;
-  const TOKEN = env.GH_TOKEN;
-  if (!TOKEN) return json({ ok: false, reason: "not-configured" }, 500);
-
   let body;
   try {
     body = await context.request.json();
@@ -83,34 +53,15 @@ export async function onRequestPost(context) {
     return json({ ok: false, reason: "bad-body" }, 400);
   }
 
-  const path = pathOf(songId);
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const list = await readTop(songId);
-    list.push({
-      playerId: playerId,
-      score: Math.round(score),
-      rate: rate,
-      date: new Date().toISOString(),
-    });
-    list.sort(function (a, b) { return b.score - a.score; });
-    const top = list.slice(0, 10);
-    const payload = {
-      message: "成绩提交 " + playerId + " " + Math.round(score),
-      content: b64(JSON.stringify({ scores: top }, null, 1)),
-    };
-    const sha = await getSha(path, TOKEN);
-    if (sha) payload.sha = sha;
-    const res = await fetch(API + "/contents/" + path, {
-      method: "PUT",
-      headers: {
-        Authorization: "Bearer " + TOKEN,
-        "X-GitHub-Api-Version": "2022-11-28",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-    if (res.status === 409) continue;
-    return json({ ok: res.ok, status: res.status, top: top });
-  }
-  return json({ ok: false, reason: "conflict" }, 409);
+  const list = await readTop(env, songId);
+  list.push({
+    playerId: playerId,
+    score: Math.round(score),
+    rate: rate,
+    date: new Date().toISOString(),
+  });
+  list.sort(function (a, b) { return b.score - a.score; });
+  const top = list.slice(0, 10);
+  await env.LB.put(songId, JSON.stringify({ scores: top }, null, 1));
+  return json({ ok: true, top: top });
 }
