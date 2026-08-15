@@ -341,10 +341,6 @@
     const box = $("rank-list");
     box.innerHTML = '<p class="sub">加载中…</p>';
     $("rank-modal").classList.remove("hidden");
-    if (!window.Leaderboard || !Leaderboard.isConfigured()) {
-      box.innerHTML = '<p class="sub">排行榜尚未启用：需要在 js/leaderboard.js 填入 GitHub Token</p>';
-      return;
-    }
     try {
       const top = await Leaderboard.fetchTop(song.id);
       box.innerHTML = "";

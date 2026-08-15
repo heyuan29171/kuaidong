@@ -12,16 +12,22 @@
 
 ## 全局排行榜
 
-排行榜数据保存在本仓库 `leaderboard/<songId>.json`（每首歌存前十），通过 GitHub Contents API 读写，无需自建服务器。游完一局如果进入前十，会弹窗让你输入 ID 上榜。
+排行榜数据保存在本仓库 `leaderboard/<songId>.json`（每首歌存前十）。为了**不把 token 暴露给浏览器**，写入操作由 **Cloudflare Pages Functions 代理**完成：token 只存在于 Cloudflare 服务端环境变量，浏览器端永远接触不到。
 
-启用方法（只做一次）：
+游完一局如果进入前十，会弹窗让你输入 ID 上榜。
 
-1. 在 GitHub 打开仓库 → Settings → Developer settings → **Fine-grained personal access tokens** → Generate new token
-2. 只勾选本仓库（kuaidong），Repository permissions → Contents → **Read and write**
-3. 把 `js/leaderboard-config.example.js` 复制一份为 `js/leaderboard-config.js`，将 Token 填入其中的 `token: ""`
-4. `js/leaderboard-config.js` 已被 `.gitignore` 排除，**Token 永远不会被提交到仓库**；Token 留空时排行榜自动禁用，不影响游玩
+### 部署到 Cloudflare Pages（正式站）
 
-> 注意：因为配置文件不进仓库，线上 GitHub Pages 版本不会带 Token，排行榜仅在本地打开时可用。若要在线上启用，请配合 GitHub Actions Secret 注入（把配置文件内容在部署时生成），或改用自己的只读代理。
+1. 把本仓库导入 Cloudflare Pages：Dashboard → Workers & Pages → Create → Pages → 连接你的 GitHub，选 `kuaidong` 仓库，构建命令留空（纯静态）。
+2. 在 Pages 项目 → **Settings → Environment variables** 添加生产环境变量：
+   - 名称 `GH_TOKEN`，值 = 你生成的 fine-grained token（仅授予 kuaidong 仓库的 Contents 读写权限）
+   - 保存后重新部署一次让变量生效
+3. 生成 token 的地方：GitHub → Settings → Developer settings → **Fine-grained personal access tokens**，只勾选 `kuaidong` 仓库，Repository permissions → Contents → **Read and write**
+4. 部署完成后访问 `https://<项目名>.pages.dev`，排行榜即在线可用
+
+> 自动部署：之后每次 push 到 main，Cloudflare 会自动重新构建（Functions 里的 `GH_TOKEN` 从环境变量读取，浏览器永远拿不到）。
+
+> 说明：GitHub Pages 版（`heyuan29171.github.io/kuaidong`）仍保留，但它没有代理接口，排行榜按钮会提示加载失败；**请以 Cloudflare Pages 的域名作为正式访问地址**。前端接口路径为 `/api/leaderboard`（Cloudflare Pages Functions 路由，见 `functions/api/leaderboard.js`）。
 
 ## 谱面编辑器
 
