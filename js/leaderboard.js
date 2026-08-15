@@ -5,8 +5,8 @@
  *
  * 使用前需：
  *   1. 在本仓库创建 leaderboard/ 目录（放一个占位文件即可）
- *   2. 在 GitHub 生成 fine-grained token，仅授予本仓库
- *      leaderboard/** 路径的 Contents 读写权限
+ *   2. 在 GitHub 生成 fine-grained token，仅授予本仓库的
+ *      Contents 读写权限（GitHub 只支持仓库级限制，不支持路径级）
  *   3. 把 TOKEN 填到下面
  * 详见 README「全局排行榜」一节。
  * ========================================================= */
