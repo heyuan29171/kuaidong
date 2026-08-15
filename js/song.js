@@ -28,6 +28,10 @@
                         { r: 57, t: 3 }, { r: 53, t: 4 }, { r: 55, t: 4 }, { r: 57, t: 4 }]; // Am Em F G Am F G Am
   const PROG_STORM   = [{ r: 50, t: 3 }, { r: 46, t: 4 }, { r: 53, t: 4 }, { r: 48, t: 4 },
                         { r: 50, t: 3 }, { r: 46, t: 4 }, { r: 48, t: 4 }, { r: 50, t: 4 }]; // Dm Bb F C Dm Bb C Dm
+  const PROG_BLAZE   = [{ r: 50, t: 3 }, { r: 46, t: 4 }, { r: 45, t: 4 }, { r: 48, t: 4 },
+                        { r: 50, t: 3 }, { r: 46, t: 4 }, { r: 43, t: 3 }, { r: 45, t: 4 }]; // Dm Bb F C Dm Bb Gm A
+  const PROG_SHADOW  = [{ r: 52, t: 3 }, { r: 50, t: 3 }, { r: 48, t: 4 }, { r: 45, t: 4 },
+                        { r: 52, t: 3 }, { r: 48, t: 4 }, { r: 45, t: 4 }, { r: 50, t: 3 }]; // Em Dm C A Em C A Dm
 
   /* ---------- 内置曲 1：小星星（童谣，C 大调） ---------- */
   /* beats >= 2 的音自动变成长按音符 */
@@ -185,6 +189,59 @@
     return seq;
   }
 
+  /* ---------- 内置曲 6：烈焰霓虹（D 小调，155BPM 高速电子，16 分跑动+双押+长按） ---------- */
+  function buildBlazeSeq() {
+    const prog = PROG_BLAZE;
+    const seq = [];
+    for (let i = 0; i < 40; i++) {
+      const ch = prog[i % prog.length];
+      const r = ch.r, t3 = ch.t;
+      if (i % 2 === 1) {
+        /* 16 分小调音阶急速跑动（2 拍）+ 双轨长按（2 拍） */
+        const run = [r, r + 2, r + 3, r + 5, r + 7, r + 8, r + 10, r + 12];
+        for (let k = 0; k < 8; k++) seq.push([run[k], 0.25, k % 2 === 0 ? 1 : 0]);
+        seq.push({ notes: [[r + 12, 0], [r + 12, 1]], beats: 2 });
+      } else {
+        /* 8 分快速琶音（4 拍），第 3 拍换成双押 */
+        const pat = [r + 12, r + 7, r + t3 + 12, r + 12, r + 7, r + t3 + 12, r + 12, r + 7];
+        for (let k = 0; k < 8; k++) {
+          if (k === 4) seq.push({ notes: [[pat[k], 0], [pat[k], 1]], beats: 0.5 });
+          else seq.push([pat[k], 0.5, k % 2 === 0 ? 0 : 1]);
+        }
+      }
+    }
+    return seq;
+  }
+
+  /* ---------- 内置曲 7：暗影冲击（E 小调，160BPM 重击电子，切分+双押+长按） ---------- */
+  function buildShadowSeq() {
+    const prog = PROG_SHADOW;
+    const seq = [];
+    for (let i = 0; i < 36; i++) {
+      const ch = prog[i % prog.length];
+      const r = ch.r, t3 = ch.t;
+      if (i % 3 === 2) {
+        /* 16 分低音重击（2 拍）+ 双轨长按（2 拍） */
+        const run = [r, r + 12, r + 7, r + 12, r, r + 12, r + 7, r + 12];
+        for (let k = 0; k < 8; k++) seq.push([run[k], 0.25, k % 2 === 0 ? 0 : 1]);
+        seq.push({ notes: [[r + 12, 0], [r + 12, 1]], beats: 2 });
+      } else if (i % 3 === 1) {
+        /* 16 分音阶上行爆发（2 拍）+ 单轨长按（2 拍） */
+        const run = [r, r + 2, r + 3, r + 5, r + 7, r + 8, r + 10, r + 12];
+        for (let k = 0; k < 8; k++) seq.push([run[k], 0.25, k % 2 === 0 ? 1 : 0]);
+        seq.push({ notes: [[r + 12, 1]], beats: 2 });
+      } else {
+        /* 8 分切分琶音（4 拍），第 3 拍换成双押 */
+        const pat = [r + 7, r + 12, r + t3 + 12, r + 12, r + 7, r + t3 + 12, r + 12, r + 7];
+        for (let k = 0; k < 8; k++) {
+          if (k === 4) seq.push({ notes: [[pat[k], 0], [pat[k], 1]], beats: 0.5 });
+          else seq.push([pat[k], 0.5, k % 2 === 0 ? 0 : 1]);
+        }
+      }
+    }
+    return seq;
+  }
+
   /* ---------- 难度分级：按音符密度 NPS（含长按时长加成） ---------- */
   function calcDifficulty(song) {
     const notes = song.notes || [];
@@ -283,7 +340,41 @@
     return song;
   }
 
-  const BUILTIN = [builtinTwinkle(120), builtinCloud(96), builtinStar(120), builtinRain(100), builtinStorm(150)];
+  function builtinBlaze(bpm) {
+    const song = {
+      id: "blaze",
+      title: "烈焰霓虹",
+      artist: "内置合成",
+      genre: "高速电子",
+      bpm: 155,
+      offset: 0.6,
+      volume: 0.3,
+      source: "synth",
+      prog: PROG_BLAZE,
+      notes: buildNotes(buildBlazeSeq(), bpm),
+    };
+    Object.assign(song, calcDifficulty(song));
+    return song;
+  }
+
+  function builtinShadow(bpm) {
+    const song = {
+      id: "shadow",
+      title: "暗影冲击",
+      artist: "内置合成",
+      genre: "重击电子",
+      bpm: 160,
+      offset: 0.6,
+      volume: 0.3,
+      source: "synth",
+      prog: PROG_SHADOW,
+      notes: buildNotes(buildShadowSeq(), bpm),
+    };
+    Object.assign(song, calcDifficulty(song));
+    return song;
+  }
+
+  const BUILTIN = [builtinTwinkle(120), builtinCloud(96), builtinStar(120), builtinRain(100), builtinStorm(150), builtinBlaze(155), builtinShadow(160)];
 
   /* ---------- 自定义曲持久化 ---------- */
   function loadJSON(key, fallback) {

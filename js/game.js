@@ -398,6 +398,13 @@
           if (sv) sv.textContent = ok ? "✓ 成绩已保存到本地" : "已存入浏览器缓存（可点曲库「保存到本地文件夹」存到磁盘）";
         }).catch(() => {});
       }
+      /* 全局排行榜：异步判断是否进前十，进则弹窗输 ID 上榜 */
+      if (window.Leaderboard) {
+        Leaderboard.maybeSubmit(song, {
+          score: stats.score, rate: rate, perfect: stats.perfect,
+          good: stats.good, miss: stats.miss,
+        });
+      }
     } catch (e) { /* 任何异常都不影响结算界面显示 */ }
   }
 
@@ -435,6 +442,22 @@
     });
     AudioEngine.ensureCtx();
   }
+
+  /* 移动端触摸打歌：左右半屏触摸区（也支持鼠标点击试玩） */
+  function bindTouchZone(el, lane) {
+    if (!el) return;
+    el.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      if (state === "playing") judge(lane);
+    });
+    el.addEventListener("pointerup", (e) => {
+      e.preventDefault();
+      release(lane);
+    });
+    el.addEventListener("pointercancel", () => release(lane));
+  }
+  bindTouchZone(document.getElementById("touch-left"), 0);
+  bindTouchZone(document.getElementById("touch-right"), 1);
 
   window.Game = {
     loadSong,

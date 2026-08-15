@@ -7,6 +7,22 @@
 - 双轨下落式音游，用 `A S D F` / `J K L ;` 击打音符，支持长按
 - 按键音效与判定音效跟随音符音调
 - 自带内置曲目，也可**上传本地音频作为 BGM**
+- **移动端**（触屏）可直接游玩，两轨各有一个触摸区域
+- 每首歌有**全局排行榜**（见下节）
+
+## 全局排行榜
+
+排行榜数据保存在本仓库 `leaderboard/<songId>.json`（每首歌存前十），通过 GitHub Contents API 读写，无需自建服务器。游完一局如果进入前十，会弹窗让你输入 ID 上榜。
+
+启用方法（只做一次）：
+
+1. 在 GitHub 打开仓库 → Settings → Developer settings → **Fine-grained personal access tokens** → Generate new token
+2. 只勾选本仓库（kuaidong），Repository permissions → Contents → **Read and write**
+3. **关键**：在 *Repository access* 下方的 *Restrict permissions to only the paths* 中填写 `leaderboard/**`（这样 Token 只能读写排行榜文件，不碰你的代码）
+4. 生成后把 Token 填入 `js/leaderboard.js` 顶部的 `TOKEN = ""`（建议用 GitHub Pages 部署仓库，Token 不会随构建发布；本地直接改本文件即可）
+5. 提交代码后排行榜即生效；Token 留空时排行榜自动禁用，不影响游玩
+
+> 注意：`TOKEN` 是敏感信息，请勿提交到公开仓库（如要在线启用，建议配合 GitHub Actions Secret 做注入，或使用自己的只读代理）。
 
 ## 谱面编辑器
 

@@ -95,10 +95,12 @@
         bestTxt +
         '<div class="ops">' +
         '<button class="btn primary" data-act="play">游玩</button>' +
+        '<button class="btn" data-act="rank">排行榜</button>' +
         '<button class="btn" data-act="edit">编辑谱面</button>' +
         "</div>" +
         (isCustom ? '<button class="del" data-act="del" title="删除">×</button>' : "");
       card.querySelector('[data-act="play"]').addEventListener("click", () => playSong(s));
+      card.querySelector('[data-act="rank"]').addEventListener("click", () => openRank(s));
       card.querySelector('[data-act="edit"]').addEventListener("click", () => editSong(s));
       if (isCustom) {
         card.querySelector('[data-act="del"]').addEventListener("click", () => {
@@ -333,6 +335,72 @@
   $("btn-scores").addEventListener("click", openScores);
   $("btn-scores-close").addEventListener("click", () => $("scores-modal").classList.add("hidden"));
 
+  /* ---------- 全局排行榜 ---------- */
+  async function openRank(song) {
+    $("rank-title").textContent = "排行榜 · " + (song.title || "");
+    const box = $("rank-list");
+    box.innerHTML = '<p class="sub">加载中…</p>';
+    $("rank-modal").classList.remove("hidden");
+    if (!window.Leaderboard || !Leaderboard.isConfigured()) {
+      box.innerHTML = '<p class="sub">排行榜尚未启用：需要在 js/leaderboard.js 填入 GitHub Token</p>';
+      return;
+    }
+    try {
+      const top = await Leaderboard.fetchTop(song.id);
+      box.innerHTML = "";
+      if (!top.length) {
+        box.innerHTML = '<p class="sub">还没有人上榜，快去拿第一吧</p>';
+        return;
+      }
+      const medals = ["🥇", "🥈", "🥉"];
+      for (let i = 0; i < top.length; i++) {
+        const r = top[i];
+        const d = document.createElement("div");
+        d.className = "score-row";
+        d.innerHTML = '<div class="score-name">' + (medals[i] || (i + 1)) + " " + esc(r.playerId || "匿名") + "</div>" +
+          '<div class="score-val">' + r.score + " 分 · 达成 " + (r.rate != null ? r.rate + "%" : "—") + "</div>" +
+          '<div class="score-date">' + (r.date ? String(r.date).slice(0, 10) : "") + "</div>";
+        box.appendChild(d);
+      }
+    } catch (e) {
+      box.innerHTML = '<p class="sub">加载失败：' + esc(e && e.message ? e.message : e) + "</p>";
+    }
+  }
+  $("btn-rank-close").addEventListener("click", () => $("rank-modal").classList.add("hidden"));
+
+  /* 打完进前十 → 弹窗让玩家输 ID 上榜（由 Leaderboard.maybeSubmit 调用） */
+  let pendingRank = null;
+  function showRankSubmit(song, result) {
+    pendingRank = { song: song, result: result };
+    $("rank-submit-id").value = "";
+    $("rank-submit-status").textContent = "你的分数 " + result.score + "，将公开上榜到《" + song.title + "》";
+    $("rank-submit-modal").classList.remove("hidden");
+  }
+  $("btn-rank-submit").addEventListener("click", async () => {
+    const pid = $("rank-submit-id").value.trim();
+    const st = $("rank-submit-status");
+    if (!pendingRank) return;
+    if (!pid) { st.textContent = "请先输入 ID"; return; }
+    st.textContent = "正在提交…";
+    try {
+      const res = await Leaderboard.submit({
+        songId: pendingRank.song.id,
+        playerId: pid,
+        score: pendingRank.result.score,
+        rate: pendingRank.result.rate,
+      });
+      if (res && res.ok) {
+        st.textContent = "✓ 已上榜！";
+        setTimeout(() => $("rank-submit-modal").classList.add("hidden"), 1200);
+      } else {
+        st.textContent = "提交失败（" + ((res && (res.reason || res.status)) || "网络错误") + "），请稍后再试";
+      }
+    } catch (e) {
+      st.textContent = "提交失败：" + (e && e.message ? e.message : e);
+    }
+  });
+  $("btn-rank-submit-cancel").addEventListener("click", () => $("rank-submit-modal").classList.add("hidden"));
+
   $("calib-close").addEventListener("click", () => { stopCalib(); $("calib-modal").classList.add("hidden"); });
   $("calib-plus").addEventListener("click", () => {
     SongLib.Settings.setCal(SongLib.Settings.calMs + 5);
@@ -454,7 +522,7 @@
   /* 首次启动：确保音频上下文可被用户手势解锁 */
   document.addEventListener("pointerdown", () => AudioEngine.ensureCtx(), { once: true });
 
-  window.Main = { refresh, showView };
+  window.Main = { refresh, showView, showRankSubmit };
 
   /* 曲库排序下拉 */
   $("sort-select").value = getSort();

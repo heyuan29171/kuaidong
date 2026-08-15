@@ -1,73 +1,73 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>快动 · 双轨下落音乐游戏</title>
-<link rel="stylesheet" href="css/style.css" />
+<title>蹇姩 路 鍙岃建涓嬭惤闊充箰娓告垙</title>
+<link rel="stylesheet" href="css/style.css?v=28" />
 </head>
 <body>
 
 <header class="topbar">
-  <div class="brand">快动 <span>KUAIDONG</span></div>
+  <div class="brand">蹇姩 <span>KUAIDONG</span></div>
   <nav class="nav">
-    <button data-view="menu" class="active">曲库</button>
-    <button data-view="game">游玩</button>
-    <button data-view="editor">谱面编辑</button>
-    <button data-view="tutorial">编辑教程</button>
+    <button data-view="menu" class="active">鏇插簱</button>
+    <button data-view="game">娓哥帺</button>
+    <button data-view="editor">璋遍潰缂栬緫</button>
+    <button data-view="tutorial">缂栬緫鏁欑▼</button>
   </nav>
-  <div class="key-hint">键位：<b>A S D F</b> 左轨 &nbsp; <b>J K L ;</b> 右轨</div>
+  <div class="key-hint">閿綅锛?b>A S D F</b> 宸﹁建 &nbsp; <b>J K L ;</b> 鍙宠建</div>
 </header>
 
 <main>
-  <!-- 曲库 -->
+  <!-- 鏇插簱 -->
   <section id="view-menu" class="view active">
-    <h2 class="view-title">曲库</h2>
-    <p class="sub">选择一首歌开始游戏，或编辑谱面</p>
+    <h2 class="view-title">鏇插簱</h2>
+    <p class="sub">閫夋嫨涓€棣栨瓕寮€濮嬫父鎴忥紝鎴栫紪杈戣氨闈?/p>
     <div id="storage-status" class="storage-status"></div>
     <div class="song-toolbar">
-      <label class="sort-label">排序
+      <label class="sort-label">鎺掑簭
         <select id="sort-select">
-          <option value="default">默认</option>
-          <option value="title">标题 A-Z</option>
-          <option value="bpm">BPM 从高到低</option>
-          <option value="stars">难度从高到低</option>
-          <option value="notes">音符数从多到少</option>
-          <option value="best">最佳成绩从高到低</option>
-          <option value="recent">最近游玩</option>
+          <option value="default">榛樿</option>
+          <option value="title">鏍囬 A-Z</option>
+          <option value="bpm">BPM 浠庨珮鍒颁綆</option>
+          <option value="stars">闅惧害浠庨珮鍒颁綆</option>
+          <option value="notes">闊崇鏁颁粠澶氬埌灏?/option>
+          <option value="best">鏈€浣虫垚缁╀粠楂樺埌浣?/option>
+          <option value="recent">鏈€杩戞父鐜?/option>
         </select>
       </label>
     </div>
     <div id="song-list" class="song-list"></div>
     <div id="import-box" class="import-box">
       <input type="file" id="audio-file" accept="audio/*" hidden />
-      <button id="btn-import-audio" class="btn">导入本地音频做 BGM</button>
-      <button id="btn-calib" class="btn">判定校准</button>
-      <button id="btn-scores" class="btn">我的成绩</button>
-      <span class="hint">（可选）导入后需在编辑器里给这首曲子编排谱面</span>
+      <button id="btn-import-audio" class="btn">瀵煎叆鏈湴闊抽鍋?BGM</button>
+      <button id="btn-calib" class="btn">鍒ゅ畾鏍″噯</button>
+      <button id="btn-scores" class="btn">鎴戠殑鎴愮哗</button>
+      <span class="hint">锛堝彲閫夛級瀵煎叆鍚庨渶鍦ㄧ紪杈戝櫒閲岀粰杩欓鏇插瓙缂栨帓璋遍潰</span>
     </div>
     <div id="import-box" class="import-box">
-      <button id="btn-backup" class="btn">导出存档</button>
-      <button id="btn-dir" class="btn primary">保存到本地文件夹</button>
+      <button id="btn-backup" class="btn">瀵煎嚭瀛樻。</button>
+      <button id="btn-dir" class="btn primary">淇濆瓨鍒版湰鍦版枃浠跺す</button>
       <input type="file" id="backup-file" accept="application/json" hidden />
-      <button id="btn-restore" class="btn">导入存档</button>
-      <span class="hint">若刷新后成绩丢失，点「保存到本地文件夹」可自动恢复</span>
+      <button id="btn-restore" class="btn">瀵煎叆瀛樻。</button>
+      <span class="hint">鑻ュ埛鏂板悗鎴愮哗涓㈠け锛岀偣銆屼繚瀛樺埌鏈湴鏂囦欢澶广€嶅彲鑷姩鎭㈠</span>
     </div>
   </section>
 
-  <!-- 游戏 -->
+  <!-- 娓告垙 -->
   <section id="view-game" class="view">
     <div class="game-head">
-      <button id="btn-back-menu" class="btn ghost">返回曲库</button>
+      <button id="btn-back-menu" class="btn ghost">杩斿洖鏇插簱</button>
       <div class="game-info">
         <span id="game-song-title" class="song-name"></span>
         <span id="game-song-meta" class="song-meta"></span>
         <span id="bgm-status" class="song-meta"></span>
       </div>
       <div class="hud">
-        <span class="hud-item">分数 <b id="hud-score">0</b></span>
-        <span class="hud-item">连击 <b id="hud-combo">0</b></span>
-        <span class="hud-item">进度 <b id="hud-progress">0%</b></span>
+        <span class="hud-item">鍒嗘暟 <b id="hud-score">0</b></span>
+        <span class="hud-item">杩炲嚮 <b id="hud-combo">0</b></span>
+        <span class="hud-item">杩涘害 <b id="hud-progress">0%</b></span>
       </div>
     </div>
     <div class="play-area">
@@ -83,62 +83,65 @@
         <div class="notes" id="notes-1"></div>
       </div>
       <div id="judge-pop" class="judge-pop"></div>
-      <!-- 打歌助手角色（Q 版莱特） -->
+      <!-- 鎵撴瓕鍔╂墜瑙掕壊锛圦 鐗堣幈鐗癸級 -->
       <div id="avatar" class="avatar-wrap">
         <div id="avatar-combo" class="avatar-combo">0</div>
-        <img id="avatar-img" class="avatar-img" src="img/lycaon-idle.svg" alt="助手" />
+        <img id="avatar-img" class="avatar-img" src="img/lycaon-idle.svg" alt="鍔╂墜" />
         <div id="avatar-msg" class="avatar-msg"></div>
       </div>
+      <!-- 绉诲姩绔Е鎽告墦姝屽尯锛氬乏鍗婂睆=宸﹁建锛屽彸鍗婂睆=鍙宠建 -->
+      <div id="touch-left" class="touch-zone touch-left"></div>
+      <div id="touch-right" class="touch-zone touch-right"></div>
     </div>
 
     <div class="game-controls">
-      <button id="btn-game-back" class="btn">退出</button>
-      <span id="game-state-tip" class="hint">按 A S D F / J K L ; 敲击到达判定线的音符</span>
+      <button id="btn-game-back" class="btn">閫€鍑?/button>
+      <span id="game-state-tip" class="hint">鎸?A S D F / J K L ; 鏁插嚮鍒拌揪鍒ゅ畾绾跨殑闊崇</span>
     </div>
     <div id="result-panel" class="result-panel hidden">
       <h2 id="result-title"></h2>
       <div id="res-record" class="record-badge"></div>
       <div class="result-grid">
-        <div><b id="res-score">0</b><span>分数</span></div>
-        <div><b id="res-maxcombo">0</b><span>最大连击</span></div>
-        <div><b id="res-perfect">0</b><span>完美</span></div>
-        <div><b id="res-good">0</b><span>良好</span></div>
-        <div><b id="res-miss">0</b><span>漏接</span></div>
-        <div><b id="res-rate">0%</b><span>达成率</span></div>
+        <div><b id="res-score">0</b><span>鍒嗘暟</span></div>
+        <div><b id="res-maxcombo">0</b><span>鏈€澶ц繛鍑?/span></div>
+        <div><b id="res-perfect">0</b><span>瀹岀編</span></div>
+        <div><b id="res-good">0</b><span>鑹ソ</span></div>
+        <div><b id="res-miss">0</b><span>婕忔帴</span></div>
+        <div><b id="res-rate">0%</b><span>杈炬垚鐜?/span></div>
       </div>
       <div class="result-ops">
-        <button id="btn-retry" class="btn primary">再玩一次</button>
-        <button id="btn-to-menu" class="btn">返回曲库</button>
+        <button id="btn-retry" class="btn primary">鍐嶇帺涓€娆?/button>
+        <button id="btn-to-menu" class="btn">杩斿洖鏇插簱</button>
       </div>
       <div id="res-save" class="res-save"></div>
     </div>
   </section>
 
-  <!-- 编辑器 -->
+  <!-- 缂栬緫鍣?-->
   <section id="view-editor" class="view">
     <div class="editor-head">
-      <button id="btn-editor-back" class="btn ghost">返回曲库</button>
-      <input id="ed-title" class="ed-input" placeholder="曲名" />
+      <button id="btn-editor-back" class="btn ghost">杩斿洖鏇插簱</button>
+      <input id="ed-title" class="ed-input" placeholder="鏇插悕" />
       <label>BPM <input id="ed-bpm" class="ed-num" type="number" value="120" min="40" max="300" /></label>
-      <label>偏移(秒) <input id="ed-offset" class="ed-num" type="number" value="0.6" step="0.05" /></label>
-      <label>吸附 <select id="ed-snap"><option value="4">1/4</option><option value="2">1/8</option><option value="1">1/16</option><option value="0">关闭</option></select></label>
-      <button id="btn-play" class="btn">播放 / 暂停</button>
-      <button id="btn-clear" class="btn ghost">清空</button>
-      <button id="btn-save" class="btn primary">保存到曲库</button>
-      <button id="btn-export" class="btn">导出 JSON</button>
+      <label>鍋忕Щ(绉? <input id="ed-offset" class="ed-num" type="number" value="0.6" step="0.05" /></label>
+      <label>鍚搁檮 <select id="ed-snap"><option value="4">1/4</option><option value="2">1/8</option><option value="1">1/16</option><option value="0">鍏抽棴</option></select></label>
+      <button id="btn-play" class="btn">鎾斁 / 鏆傚仠</button>
+      <button id="btn-clear" class="btn ghost">娓呯┖</button>
+      <button id="btn-save" class="btn primary">淇濆瓨鍒版洸搴?/button>
+      <button id="btn-export" class="btn">瀵煎嚭 JSON</button>
       <input type="file" id="ed-audio-file" accept="audio/*" hidden />
-      <button id="btn-ed-audio" class="btn">导入 BGM</button>
-      <label>难度 <select id="ed-gen-diff">
-        <option value="easy">简单</option>
-        <option value="normal" selected>普通</option>
-        <option value="hard">困难</option>
+      <button id="btn-ed-audio" class="btn">瀵煎叆 BGM</button>
+      <label>闅惧害 <select id="ed-gen-diff">
+        <option value="easy">绠€鍗?/option>
+        <option value="normal" selected>鏅€?/option>
+        <option value="hard">鍥伴毦</option>
       </select></label>
-      <button id="btn-autogen" class="btn primary">自动生成谱面</button>
+      <button id="btn-autogen" class="btn primary">鑷姩鐢熸垚璋遍潰</button>
       <span id="ed-audio-name" class="hint"></span>
     </div>
     <div class="editor-meta">
-      <span id="ed-note-count" class="hint">音符：0</span>
-      <span class="hint">点击添加 · Shift+点击加长按 · 拖动移动（有吸附参考线）· 拖长按尾部改时长 · 右键删除 · 空格播放 · 点击音符选中后用 ↑/↓ 调音高、←/→ 切换 · 滚轮滑动时间轴、Ctrl+滚轮缩放</span>
+      <span id="ed-note-count" class="hint">闊崇锛?</span>
+      <span class="hint">鐐瑰嚮娣诲姞 路 Shift+鐐瑰嚮鍔犻暱鎸?路 鎷栧姩绉诲姩锛堟湁鍚搁檮鍙傝€冪嚎锛壜?鎷栭暱鎸夊熬閮ㄦ敼鏃堕暱 路 鍙抽敭鍒犻櫎 路 绌烘牸鎾斁 路 鐐瑰嚮闊崇閫変腑鍚庣敤 鈫?鈫?璋冮煶楂樸€佲啇/鈫?鍒囨崲 路 婊氳疆婊戝姩鏃堕棿杞淬€丆trl+婊氳疆缂╂斁</span>
     </div>
     <div class="canvas-wrap">
       <canvas id="editor-canvas"></canvas>
@@ -146,77 +149,77 @@
     <div class="editor-timeline" id="editor-timeline"></div>
   </section>
 
-  <!-- 编辑教程 -->
+  <!-- 缂栬緫鏁欑▼ -->
   <section id="view-tutorial" class="view">
-    <h2 class="view-title">谱面编辑教程</h2>
-    <p class="sub">用编辑器做一首属于自己的歌，再回到曲库游玩</p>
+    <h2 class="view-title">璋遍潰缂栬緫鏁欑▼</h2>
+    <p class="sub">鐢ㄧ紪杈戝櫒鍋氫竴棣栧睘浜庤嚜宸辩殑姝岋紝鍐嶅洖鍒版洸搴撴父鐜?/p>
 
     <div class="tutorial">
       <div class="tut-block">
-        <h3>1. 新建或打开谱面</h3>
+        <h3>1. 鏂板缓鎴栨墦寮€璋遍潰</h3>
         <ul>
-          <li>曲库页点 <b>“导入本地音频做 BGM”</b>，选择 mp3 / wav / ogg：会新建一首曲子并把音频设为其背景音乐（可选，纯合成曲可直接做谱）。</li>
-          <li>或在编辑器顶部输入曲名、BPM、偏移直接开始空谱面编辑；点曲库卡片的 <b>“编辑谱面”</b> 可修改内置曲。</li>
+          <li>鏇插簱椤电偣 <b>鈥滃鍏ユ湰鍦伴煶棰戝仛 BGM鈥?/b>锛岄€夋嫨 mp3 / wav / ogg锛氫細鏂板缓涓€棣栨洸瀛愬苟鎶婇煶棰戣涓哄叾鑳屾櫙闊充箰锛堝彲閫夛紝绾悎鎴愭洸鍙洿鎺ュ仛璋憋級銆?/li>
+          <li>鎴栧湪缂栬緫鍣ㄩ《閮ㄨ緭鍏ユ洸鍚嶃€丅PM銆佸亸绉荤洿鎺ュ紑濮嬬┖璋遍潰缂栬緫锛涚偣鏇插簱鍗＄墖鐨?<b>鈥滅紪杈戣氨闈⑩€?/b> 鍙慨鏀瑰唴缃洸銆?/li>
         </ul>
       </div>
 
       <div class="tut-block">
-        <h3>2. 认识参数</h3>
+        <h3>2. 璁よ瘑鍙傛暟</h3>
         <ul>
-          <li><b>BPM</b>：每分钟节拍数，决定网格与音符吸附的疏密。</li>
-          <li><b>偏移（秒）</b>：整份谱面相对音乐整体后移的时间，用于对齐前奏。</li>
-          <li><b>吸附</b>：音符自动贴齐 1/4 拍、1/8 拍或 1/16 拍（可关）。移动鼠标时画面上会出现一条金色虚线，表示音符当前会吸附到的拍点位置，方便卡准。</li>
+          <li><b>BPM</b>锛氭瘡鍒嗛挓鑺傛媿鏁帮紝鍐冲畾缃戞牸涓庨煶绗﹀惛闄勭殑鐤忓瘑銆?/li>
+          <li><b>鍋忕Щ锛堢锛?/b>锛氭暣浠借氨闈㈢浉瀵归煶涔愭暣浣撳悗绉荤殑鏃堕棿锛岀敤浜庡榻愬墠濂忋€?/li>
+          <li><b>鍚搁檮</b>锛氶煶绗﹁嚜鍔ㄨ创榻?1/4 鎷嶃€?/8 鎷嶆垨 1/16 鎷嶏紙鍙叧锛夈€傜Щ鍔ㄩ紶鏍囨椂鐢婚潰涓婁細鍑虹幇涓€鏉￠噾鑹茶櫄绾匡紝琛ㄧず闊崇褰撳墠浼氬惛闄勫埌鐨勬媿鐐逛綅缃紝鏂逛究鍗″噯銆?/li>
         </ul>
       </div>
 
       <div class="tut-block">
-        <h3>3. 添加音符</h3>
+        <h3>3. 娣诲姞闊崇</h3>
         <ul>
-          <li><b>普通音符</b>：在上 / 下两条轨道点击空白处，音符落在该时刻、该轨道。</li>
-          <li><b>长按音符</b>：按住 <b>Shift</b> 再点击轨道，会生成一个长按音符（圆点下方带竖条），需要按住按键直到竖条走完。</li>
-          <li><b>双押音符</b>：同一时刻在上下两条轨道各放一个音符，游戏里两个音符都会套上金色光圈，表示需要两键同按。</li>
+          <li><b>鏅€氶煶绗?/b>锛氬湪涓?/ 涓嬩袱鏉¤建閬撶偣鍑荤┖鐧藉锛岄煶绗﹁惤鍦ㄨ鏃跺埢銆佽杞ㄩ亾銆?/li>
+          <li><b>闀挎寜闊崇</b>锛氭寜浣?<b>Shift</b> 鍐嶇偣鍑昏建閬擄紝浼氱敓鎴愪竴涓暱鎸夐煶绗︼紙鍦嗙偣涓嬫柟甯︾珫鏉★級锛岄渶瑕佹寜浣忔寜閿洿鍒扮珫鏉¤蛋瀹屻€?/li>
+          <li><b>鍙屾娂闊崇</b>锛氬悓涓€鏃跺埢鍦ㄤ笂涓嬩袱鏉¤建閬撳悇鏀句竴涓煶绗︼紝娓告垙閲屼袱涓煶绗﹂兘浼氬涓婇噾鑹插厜鍦堬紝琛ㄧず闇€瑕佷袱閿悓鎸夈€?/li>
         </ul>
       </div>
 
       <div class="tut-block">
-        <h3>4. 调整音符</h3>
+        <h3>4. 璋冩暣闊崇</h3>
         <ul>
-          <li><b>移动</b>：按住音符圆点拖动，可改轨道和时间（自动吸附）。</li>
-          <li><b>时长</b>：长按音符下方有尾部小柄，按住小柄上下拖动可拉长 / 缩短按住时长。</li>
-          <li><b>删除</b>：右键点击音符。</li>
-          <li><b>清空</b>：点编辑器顶部的“清空”。</li>
+          <li><b>绉诲姩</b>锛氭寜浣忛煶绗﹀渾鐐规嫋鍔紝鍙敼杞ㄩ亾鍜屾椂闂达紙鑷姩鍚搁檮锛夈€?/li>
+          <li><b>鏃堕暱</b>锛氶暱鎸夐煶绗︿笅鏂规湁灏鹃儴灏忔焺锛屾寜浣忓皬鏌勪笂涓嬫嫋鍔ㄥ彲鎷夐暱 / 缂╃煭鎸変綇鏃堕暱銆?/li>
+          <li><b>鍒犻櫎</b>锛氬彸閿偣鍑婚煶绗︺€?/li>
+          <li><b>娓呯┖</b>锛氱偣缂栬緫鍣ㄩ《閮ㄧ殑鈥滄竻绌衡€濄€?/li>
         </ul>
       </div>
 
       <div class="tut-block">
-        <h3>5. 试听</h3>
+        <h3>5. 璇曞惉</h3>
         <ul>
-          <li>按 <b>空格</b> 或点“播放 / 暂停”从头试听，黄色竖线是播放光标；配有鼓点节拍器，方便对拍。</li>
-          <li>导入的音频会同步播放；没导入音频也能听节拍和音符声。</li>
+          <li>鎸?<b>绌烘牸</b> 鎴栫偣鈥滄挱鏀?/ 鏆傚仠鈥濅粠澶磋瘯鍚紝榛勮壊绔栫嚎鏄挱鏀惧厜鏍囷紱閰嶆湁榧撶偣鑺傛媿鍣紝鏂逛究瀵规媿銆?/li>
+          <li>瀵煎叆鐨勯煶棰戜細鍚屾鎾斁锛涙病瀵煎叆闊抽涔熻兘鍚妭鎷嶅拰闊崇澹般€?/li>
         </ul>
       </div>
 
       <div class="tut-block">
-        <h3>6. 保存与游玩</h3>
+        <h3>6. 淇濆瓨涓庢父鐜?/h3>
         <ul>
-          <li>点 <b>“保存到曲库”</b>：谱面存入曲库（浏览器本地保存），自动计算难度等级。</li>
-          <li>点 <b>“导出 JSON”</b>：下载谱面文件留档或分享。</li>
-          <li>回曲库点 <b>“游玩”</b>，用 <b>A S D F / J K L ;</b> 键敲击，长按按住不放，双押两键同按。</li>
+          <li>鐐?<b>鈥滀繚瀛樺埌鏇插簱鈥?/b>锛氳氨闈㈠瓨鍏ユ洸搴擄紙娴忚鍣ㄦ湰鍦颁繚瀛橈級锛岃嚜鍔ㄨ绠楅毦搴︾瓑绾с€?/li>
+          <li>鐐?<b>鈥滃鍑?JSON鈥?/b>锛氫笅杞借氨闈㈡枃浠剁暀妗ｆ垨鍒嗕韩銆?/li>
+          <li>鍥炴洸搴撶偣 <b>鈥滄父鐜┾€?/b>锛岀敤 <b>A S D F / J K L ;</b> 閿暡鍑伙紝闀挎寜鎸変綇涓嶆斁锛屽弻鎶间袱閿悓鎸夈€?/li>
         </ul>
       </div>
 
       <div class="tut-block tip">
-        <p><b>小提示</b>：音符越接近拍点判定越准（正中靶心 = PERFECT）；难度由音符密度自动评定；每首歌会记录你的历史最佳成绩。</p>
+        <p><b>灏忔彁绀?/b>锛氶煶绗﹁秺鎺ヨ繎鎷嶇偣鍒ゅ畾瓒婂噯锛堟涓澏蹇?= PERFECT锛夛紱闅惧害鐢遍煶绗﹀瘑搴﹁嚜鍔ㄨ瘎瀹氾紱姣忛姝屼細璁板綍浣犵殑鍘嗗彶鏈€浣虫垚缁┿€?/p>
       </div>
     </div>
   </section>
 </main>
 
-<!-- 判定校准弹层 -->
+<!-- 鍒ゅ畾鏍″噯寮瑰眰 -->
 <div id="calib-modal" class="modal hidden">
   <div class="modal-box calib-box">
-    <h3>判定校准</h3>
-    <p class="hint">正数 = 音符提前下落，负数 = 音符延后下落。可手动微调，或用下面的敲击校准自动测出你的按键与节拍的差距。</p>
+    <h3>鍒ゅ畾鏍″噯</h3>
+    <p class="hint">姝ｆ暟 = 闊崇鎻愬墠涓嬭惤锛岃礋鏁?= 闊崇寤跺悗涓嬭惤銆傚彲鎵嬪姩寰皟锛屾垨鐢ㄤ笅闈㈢殑鏁插嚮鏍″噯鑷姩娴嬪嚭浣犵殑鎸夐敭涓庤妭鎷嶇殑宸窛銆?/p>
     <div class="calib-row">
       <button id="calib-minus" class="btn">-5 ms</button>
       <b id="calib-val">0</b> ms
@@ -225,47 +228,72 @@
 
     <div class="calib-row">
       <button id="speed-minus" class="btn">-0.1</button>
-      <b id="speed-val">1.3</b> 秒
-      <button id="speed-plus" class="btn">+0.1</button>
+      <b id="speed-val">1.3</b> 绉?      <button id="speed-plus" class="btn">+0.1</button>
     </div>
-    <p class="hint">音符流速：一个音符从顶部落到判定线的用时（秒），越小越快、越大越慢。下一局生效。</p>
+    <p class="hint">闊崇娴侀€燂細涓€涓煶绗︿粠椤堕儴钀藉埌鍒ゅ畾绾跨殑鐢ㄦ椂锛堢锛夛紝瓒婂皬瓒婂揩銆佽秺澶ц秺鎱€備笅涓€灞€鐢熸晥銆?/p>
 
     <div class="calib-play" id="calib-play">
       <div class="calib-lane calib-lane-0"><span class="calib-key">A S D F</span></div>
       <div class="calib-lane calib-lane-1"><span class="calib-key">J K L ;</span></div>
       <div class="calib-judge"></div>
-      <div class="calib-status" id="calib-status">点“开始敲击校准”，跟着节拍敲击对应轨道的键，测量按键与音符的差距</div>
+      <div class="calib-status" id="calib-status">鐐光€滃紑濮嬫暡鍑绘牎鍑嗏€濓紝璺熺潃鑺傛媿鏁插嚮瀵瑰簲杞ㄩ亾鐨勯敭锛屾祴閲忔寜閿笌闊崇鐨勫樊璺?/div>
     </div>
 
     <div class="calib-actions">
-      <button id="calib-start" class="btn primary">开始敲击校准</button>
-      <button id="calib-reset" class="btn" hidden>重测</button>
-      <button id="calib-apply" class="btn" hidden>应用建议值</button>
+      <button id="calib-start" class="btn primary">寮€濮嬫暡鍑绘牎鍑?/button>
+      <button id="calib-reset" class="btn" hidden>閲嶆祴</button>
+      <button id="calib-apply" class="btn" hidden>搴旂敤寤鸿鍊?/button>
     </div>
 
     <div class="calib-ops">
-      <button id="calib-close" class="btn ghost">完成</button>
+      <button id="calib-close" class="btn ghost">瀹屾垚</button>
     </div>
   </div>
 </div>
 
-<!-- 我的成绩弹层 -->
+<!-- 鎴戠殑鎴愮哗寮瑰眰 -->
 <div id="scores-modal" class="modal hidden">
   <div class="modal-box">
-    <h3>我的成绩</h3>
+    <h3>鎴戠殑鎴愮哗</h3>
     <div id="scores-list" class="scores-list"></div>
     <div class="calib-ops">
-      <button id="btn-scores-close" class="btn ghost">关闭</button>
+      <button id="btn-scores-close" class="btn ghost">鍏抽棴</button>
     </div>
   </div>
 </div>
 
-<footer class="footer">双轨下落 · 内置合成曲 · 谱面编辑器 · 纯前端无需安装</footer>
+<!-- 鍏ㄥ眬鎺掕姒滃脊灞?-->
+<div id="rank-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3 id="rank-title">鎺掕姒?/h3>
+    <div id="rank-list" class="scores-list"></div>
+    <div class="calib-ops">
+      <button id="btn-rank-close" class="btn ghost">鍏抽棴</button>
+    </div>
+  </div>
+</div>
 
-<script src="js/song.js?v=25"></script>
-  <script src="js/audio.js?v=25"></script>
-  <script src="js/game.js?v=25"></script>
-  <script src="js/editor.js?v=25"></script>
-  <script src="js/main.js?v=25"></script>
+<!-- 涓婃杈撳叆 ID 寮瑰眰 -->
+<div id="rank-submit-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>馃帀 浣犺繘浜嗗墠鍗侊紒</h3>
+    <p class="sub">杈撳叆浣犵殑 ID 涓婃锛堝叕寮€鏄剧ず锛夛細</p>
+    <input id="rank-submit-id" class="ed-num" type="text" maxlength="16" placeholder="浣犵殑 ID" style="width:100%;box-sizing:border-box;padding:8px;" />
+    <p id="rank-submit-status" class="hint"></p>
+    <div class="calib-ops">
+      <button id="btn-rank-submit" class="btn primary">鎻愪氦涓婃</button>
+      <button id="btn-rank-submit-cancel" class="btn ghost">绠椾簡</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">鍙岃建涓嬭惤 路 鍐呯疆鍚堟垚鏇?路 璋遍潰缂栬緫鍣?路 绾墠绔棤闇€瀹夎 路 <a href="https://github.com/heyuan29171/kuaidong" target="_blank" rel="noopener">GitHub 浠撳簱</a></footer>
+
+<script src="js/song.js?v=28"></script>
+  <script src="js/audio.js?v=28"></script>
+  <script src="js/game.js?v=28"></script>
+  <script src="js/leaderboard.js?v=28"></script>
+  <script src="js/editor.js?v=28"></script>
+  <script src="js/main.js?v=28"></script>
 </body>
 </html>

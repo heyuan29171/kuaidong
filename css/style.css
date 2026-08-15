@@ -440,6 +440,27 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
 
 /* ---------- 页脚 ---------- */
 .footer { text-align: center; padding: 16px; color: var(--dim); font-size: 12px; border-top: 1px solid var(--line); }
+.footer a { color: var(--accent); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+/* ---------- 移动端触摸打歌 ---------- */
+.touch-zone {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 50%;
+  z-index: 7;
+  display: none;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.touch-left  { left: 0; }
+.touch-right { right: 0; }
+@media (hover: none) and (pointer: coarse) {
+  .touch-zone { display: block; }
+  body { touch-action: none; }
+}
 
 /* ---------- 判定校准弹层 ---------- */
 .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(8, 10, 20, 0.6); display: flex; align-items: center; justify-content: center; z-index: 60; }
