@@ -7,7 +7,7 @@
 (function () {
   "use strict";
 
-  const API_BASE = "https://1135bfad.r38.cpolar.top/leaderboard";
+  const API_BASE = "https://1135bfad.r38.cpolar.top/api/leaderboard";
 
   /* 读取某首歌的前十 */
   async function fetchTop(songId) {
