@@ -20,3 +20,6 @@ build/
 *.log
 *.tmp
 *.bak
+
+# 自托管后端运行时数据（排行榜 JSON，绝不上传）
+server/data/

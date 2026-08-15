@@ -12,22 +12,33 @@
 
 ## 全局排行榜
 
-排行榜数据保存在本仓库 `leaderboard/<songId>.json`（每首歌存前十）。为了**不把 token 暴露给浏览器**，写入操作由 **Cloudflare Pages Functions 代理**完成：token 只存在于 Cloudflare 服务端环境变量，浏览器端永远接触不到。
+排行榜采用**自托管方案**：数据存在你自己电脑的本地磁盘上，完全免费、无需实名、不暴露任何 token。
+
+```
+玩家 → GitHub Pages 前端 → cpolar 内网穿透 → 本机 Node 后端(8787) → server/data/leaderboard.json
+```
 
 游完一局如果进入前十，会弹窗让你输入 ID 上榜。
 
-### 部署到 Cloudflare Pages（正式站）
+### 部署 / 运行
 
-1. 把本仓库导入 Cloudflare Pages：Dashboard → Workers & Pages → Create → Pages → 连接你的 GitHub，选 `kuaidong` 仓库，构建命令留空（纯静态）。
-2. 在 Pages 项目 → **Settings → Environment variables** 添加生产环境变量：
-   - 名称 `GH_TOKEN`，值 = 你生成的 fine-grained token（仅授予 kuaidong 仓库的 Contents 读写权限）
-   - 保存后重新部署一次让变量生效
-3. 生成 token 的地方：GitHub → Settings → Developer settings → **Fine-grained personal access tokens**，只勾选 `kuaidong` 仓库，Repository permissions → Contents → **Read and write**
-4. 部署完成后访问 `https://<项目名>.pages.dev`，排行榜即在线可用
+1. **启动后端**：双击 `server/start.bat`（需要本机安装 Node.js），看到 `排行榜服务已启动，端口 8787` 即成功。**这个窗口要一直开着**，关掉榜单就下线。
+2. **内网穿透**：本机安装 cpolar 并保持服务运行，把 `http://127.0.0.1:8787` 映射成公网地址（如 `https://xxxxx.cpolar.top`）。
+3. **前端指向**：`js/leaderboard.js` 第 9 行的 `API_BASE` 填 cpolar 给出的公网地址（形如 `https://xxxxx.cpolar.top/api/leaderboard`），然后 push 到 GitHub，GitHub Pages 自动部署。
 
-> 自动部署：之后每次 push 到 main，Cloudflare 会自动重新构建（Functions 里的 `GH_TOKEN` 从环境变量读取，浏览器永远拿不到）。
+### 接口
 
-> 说明：GitHub Pages 版（`heyuan29171.github.io/kuaidong`）仍保留，但它没有代理接口，排行榜按钮会提示加载失败；**请以 Cloudflare Pages 的域名作为正式访问地址**。前端接口路径为 `/api/leaderboard`（Cloudflare Pages Functions 路由，见 `functions/api/leaderboard.js`）。
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/leaderboard?song=<songId>` | 读取某首歌前十 |
+| POST | `/api/leaderboard` | 提交一条成绩（服务端校验分数与进前十，防刷限流） |
+
+### 维护注意
+
+- **重启电脑后**：重新双击 `server/start.bat` 启动后端，并确认 cpolar 服务在运行。
+- **cpolar 免费版域名重启后可能变化**：一旦排行榜打不开，登录 [cpolar dashboard](https://dashboard.cpolar.com) 查新地址，更新 `js/leaderboard.js` 的 `API_BASE` 并重新推送。
+- **数据备份**：排行榜数据就是 `server/data/leaderboard.json` 一个文件，定期拷贝一份即可（例如同步到本仓库或云盘）。
+- **数据安全**：`server/data/` 已被 `.gitignore` 排除，本地成绩不会上传到 GitHub。
 
 ## 谱面编辑器
 
@@ -55,6 +66,7 @@ python -m http.server 8000
 - 原生 JavaScript + Canvas，零第三方依赖
 - Web Audio API：BGM 播放、音高/节拍分析、内置曲离线渲染
 - IndexedDB：音频与存档持久化
+- 排行榜后端：Node.js 零依赖 HTTP 服务（`server/server.js`），数据存本地 JSON
 
 ## License
 
