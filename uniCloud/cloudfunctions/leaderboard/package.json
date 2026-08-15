@@ -1,0 +1,9 @@
+{
+  "name": "leaderboard",
+  "version": "1.0.0",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 5
+  }
+}

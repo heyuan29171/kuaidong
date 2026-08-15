@@ -1,12 +1,12 @@
 /* =========================================================
  * 全局排行榜（leaderboard.js）
- * 读写全部走 Cloudflare Pages Functions 代理（/api/leaderboard），
- * 数据存于 Cloudflare KV，无任何 token / 密钥，浏览器端不接触凭据。
+ * 读写走 uniCloud 阿里云版 云函数 URL化接口（api.next.bspapp.com），
+ * 数据存于 uniCloud 云数据库，无需任何 token / 密钥。
  * ========================================================= */
 (function () {
   "use strict";
 
-  const API_BASE = "/api/leaderboard";
+  const API_BASE = "https://api.next.bspapp.com/leaderboard";
 
   /* 读取某首歌的前十 */
   async function fetchTop(songId) {
@@ -14,11 +14,11 @@
       const res = await fetch(API_BASE + "?song=" + encodeURIComponent(songId), { cache: "no-store" });
       if (!res.ok) return [];
       const j = await res.json();
-      return Array.isArray(j.scores) ? j.scores : [];
+      return j && j.code === 0 && Array.isArray(j.scores) ? j.scores : [];
     } catch (e) { return []; }
   }
 
-  /* 提交一条成绩（服务端负责读-改-写与冲突重试） */
+  /* 提交一条成绩（云函数负责进前十校验与写入） */
   async function submit(entry) {
     try {
       const res = await fetch(API_BASE, {
@@ -33,7 +33,7 @@
       });
       let j = null;
       try { j = await res.json(); } catch (e) {}
-      if (j && j.ok) return { ok: true, top: j.top };
+      if (j && j.code === 0) return { ok: true, top: null };
       return { ok: false, status: res.status, reason: (j && j.reason) || "network" };
     } catch (e) {
       return { ok: false, reason: "network" };
