@@ -517,11 +517,16 @@
     return true;
   }
 
-  /* 清空玩家记录：只删成绩、自编曲、自制曲音频这三类用户数据；游戏资源（内置曲音频缓存）与文件夹授权一律不动 */
+  /* 清空玩家记录：删除成绩、自编曲、设置、自制曲音频与文件夹授权（best、custom、audio 前缀、dirHandle）；
+     游戏资源（内置曲音频缓存 builtin_audio 前缀）一律不动，避免清数据导致游戏无声 */
   function clearAll() {
     try { localStorage.removeItem(BEST_KEY); } catch (e) {}
     try { localStorage.removeItem(CUSTOM_KEY); } catch (e) {}
     try { localStorage.removeItem(Settings.key); } catch (e) {}
+    BestStore.data = {};
+    CustomStore.list = [];
+    Settings.data = {};
+    dirHandle = null;
     return new Promise((resolve) => {
       (async () => {
         try {
@@ -535,7 +540,7 @@
               rq.onerror = () => res([]);
             });
             for (const k of keys) {
-              if (typeof k === "string" && (k === "best" || k === "custom" || k.indexOf("audio_") === 0)) {
+              if (typeof k === "string" && (k === "best" || k === "custom" || k === "dirHandle" || k.indexOf("audio_") === 0)) {
                 try { st.delete(k); } catch (e) {}
               }
             }
