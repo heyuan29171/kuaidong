@@ -200,8 +200,13 @@
     if (e.repeat) return;
     const active = document.querySelector(".view.active");
     if (!active) return;
-    if (active.id === "view-game" && Game.isPlaying()) {
-      Game.handleKey(e);
+    if (active.id === "view-game") {
+      if (e.code === "KeyP" || e.code === "Space") {
+        if (Game.isPlaying()) { Game.pause(); e.preventDefault(); }
+        else if (Game.isPaused()) { Game.resume(); e.preventDefault(); }
+        return;
+      }
+      if (Game.isPlaying()) Game.handleKey(e);
     } else if (active.id === "view-editor") {
       if (e.code === "Space") { Editor.playToggle(); e.preventDefault(); }
     }
@@ -218,6 +223,13 @@
 
   /* ---------- 游戏区按钮 ---------- */
   $("btn-back-menu").addEventListener("click", () => showView("menu"));
+  $("btn-pause").addEventListener("click", () => {
+    if (Game.isPlaying()) Game.pause();
+    else if (Game.isPaused()) Game.resume();
+  });
+  const pauseOverlay = $("pause-overlay");
+  if (pauseOverlay) pauseOverlay.addEventListener("pointerdown", () => { if (Game.isPaused()) Game.resume(); });
+  $("btn-pause-resume").addEventListener("click", () => Game.resume());
   $("btn-game-back").addEventListener("click", () => showView("menu"));
   $("btn-retry").addEventListener("click", () => Game.start());
   $("btn-to-menu").addEventListener("click", () => showView("menu"));

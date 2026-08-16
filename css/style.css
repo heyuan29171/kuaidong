@@ -486,6 +486,23 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
   .touch-zone { display: block; }
 }
 
+/* ---------- 暂停遮罩 ---------- */
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 10, 20, 0.72);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+.pause-overlay.hidden { display: none; }
+.pause-box { text-align: center; color: var(--text); }
+.pause-box h3 { font-size: 26px; margin: 0 0 10px; }
+.pause-box p { font-size: 13px; color: var(--dim); margin: 0 0 16px; }
+
 /* ---------- 判定校准弹层 ---------- */
 .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(8, 10, 20, 0.6); display: flex; align-items: center; justify-content: center; z-index: 60; }
 .modal.hidden { display: none; }

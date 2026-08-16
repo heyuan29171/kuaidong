@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>快动 · 双轨下落音乐游戏</title>
-<link rel="stylesheet" href="css/style.css?v=35" />
+<link rel="stylesheet" href="css/style.css?v=36" />
 </head>
 <body>
 
@@ -65,6 +65,7 @@
   <section id="view-game" class="view">
     <div class="game-head">
       <button id="btn-back-menu" class="btn ghost">返回曲库</button>
+      <button id="btn-pause" class="btn ghost">暂停</button>
       <div class="game-info">
         <span id="game-song-title" class="song-name"></span>
         <span id="game-song-meta" class="song-meta"></span>
@@ -98,6 +99,14 @@
       <!-- 移动端触摸打歌区：左半屏=左轨，右半屏=右轨 -->
       <div id="touch-left" class="touch-zone touch-left"></div>
       <div id="touch-right" class="touch-zone touch-right"></div>
+      <!-- 暂停遮罩：覆盖打歌区，点击/继续按钮恢复 -->
+      <div id="pause-overlay" class="pause-overlay hidden">
+        <div class="pause-box">
+          <h3>已暂停</h3>
+          <p>继续后从暂停处往前 3 秒开始（最多回到开头），已打过的音符不用重打</p>
+          <button id="btn-pause-resume" class="btn primary">继续</button>
+        </div>
+      </div>
     </div>
 
     <div class="game-controls">
@@ -313,10 +322,10 @@
 <footer class="footer">双轨下落 · 内置合成曲 · 谱面编辑器 · 纯前端无需安装 · <a href="https://github.com/heyuan29171/kuaidong" target="_blank" rel="noopener">GitHub 仓库</a> · <a href="https://github.com/heyuan29171/kuaidong" target="_blank" rel="noopener">点个 ⭐</a></footer>
 
 <script src="js/song.js?v=37"></script>
-  <script src="js/audio.js?v=30"></script>
-  <script src="js/game.js?v=33"></script>
+  <script src="js/audio.js?v=31"></script>
+  <script src="js/game.js?v=34"></script>
   <script src="js/leaderboard.js?v=35"></script>
   <script src="js/editor.js?v=30"></script>
-  <script src="js/main.js?v=36"></script>
+  <script src="js/main.js?v=37"></script>
 </body>
 </html>

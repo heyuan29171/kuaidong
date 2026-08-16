@@ -123,7 +123,7 @@
   }
 
   /* 播放 AudioBuffer（作为 BGM），返回 AudioBufferSourceNode */
-  function playBuffer(buf, when, loop) {
+  function playBuffer(buf, when, loop, offset) {
     const c = ensureCtx();
     if (!c) return null;
     const src = c.createBufferSource();
@@ -133,7 +133,7 @@
     g.gain.value = 0.7;
     src.connect(g);
     g.connect(master);
-    src.start(when || 0);
+    src.start(when || 0, offset || 0);
     return src;
   }
 

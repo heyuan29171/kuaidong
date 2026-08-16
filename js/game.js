@@ -59,7 +59,7 @@
     }, 700);
   }
 
-  let state = "idle"; // idle | playing | finished
+  let state = "idle"; // idle | playing | paused | finished
   let song = null;
   let audioBuf = null;
   let notes = [];          // [{time,lane,midi,dur,el,judged,result,holding,holdEl}]
@@ -78,6 +78,7 @@
   let doubleTimes = {};           // time -> true（双押时刻）
   let barLines = [];              // 每小节辅助下落线
   let avatarTimer = null;
+  let pausedAt = 0;            // 暂停时刻的歌曲时间
   let stats = { score: 0, combo: 0, maxCombo: 0, perfect: 0, good: 0, miss: 0 };
 
   function judgeYpx() {
@@ -409,8 +410,70 @@
     } catch (e) { /* 任何异常都不影响结算界面显示 */ }
   }
 
+  function pause() {
+    if (state !== "playing") return;
+    state = "paused";
+    pausedAt = elapsed();
+    cancelAnimationFrame(raf); raf = null;
+    clearInterval(timer); timer = null;
+    if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
+    AudioEngine.silence();
+    const ov = document.getElementById("pause-overlay");
+    if (ov) ov.classList.remove("hidden");
+    const bp = document.getElementById("btn-pause");
+    if (bp) bp.textContent = "继续";
+  }
+
+  function resume() {
+    if (state !== "paused") return;
+    const ctx = AudioEngine.ensureCtx();
+    if (!ctx) return;
+    /* 从暂停处往前回退 3 秒（最多回到开头）继续 */
+    const resumeTime = Math.max(0, pausedAt - 3);
+    const t0 = AudioEngine.currentTime() + 0.2;
+    state = "playing";
+    /* 重新对齐时间轴：让 elapsed() 从 resumeTime 继续 */
+    baseTime = t0 - resumeTime - offset;
+    /* 重新播放 BGM，从 resumeTime 对应的音频位置继续 */
+    const bgmOff = Math.max(0, resumeTime - songOffset + offset);
+    if (audioBuf) bgmSrc = AudioEngine.playBuffer(audioBuf, t0 + songOffset, false, bgmOff);
+    /* 重建节拍/和弦更新计时器 */
+    const spb = 60 / song.bpm;
+    beatIndex = Math.floor(resumeTime / spb);
+    nextBeatTime = t0 + songOffset + beatIndex * spb;
+    timer = setInterval(() => {
+      const now = AudioEngine.currentTime();
+      const prog = (song.prog && song.prog.length) ? song.prog : [{ r: 60, t: 4 }, { r: 55, t: 4 }, { r: 57, t: 3 }, { r: 53, t: 4 }];
+      while (nextBeatTime < now + 0.12) {
+        if (beatIndex % 4 === 0) {
+          const bar = Math.floor(beatIndex / 4);
+          const ch = prog[bar % prog.length];
+          currentRoot = ch.r;
+        }
+        beatIndex++;
+        nextBeatTime += spb;
+      }
+    }, 25);
+    /* 已打过的音符直接从轨道移除（不用重打），未打过的正常重放 */
+    for (const n of notes) {
+      if (n.judged) {
+        if (n.el) { try { n.el.remove(); } catch (e) {} n.el = null; }
+        if (n.holdEl) { try { n.holdEl.remove(); } catch (e) {} n.holdEl = null; }
+        n.holding = false;
+      }
+    }
+    document.querySelectorAll(".beat-line").forEach((x) => x.remove());
+    barLines.forEach((b) => { b.el = null; });
+    held = [false, false];
+    raf = requestAnimationFrame(tick);
+    const ov = document.getElementById("pause-overlay");
+    if (ov) ov.classList.add("hidden");
+    const bp = document.getElementById("btn-pause");
+    if (bp) bp.textContent = "暂停";
+  }
+
   function exit() {
-    if (state === "playing" || state === "finished") {
+    if (state === "playing" || state === "paused" || state === "finished") {
       clearInterval(timer);
       timer = null;
       cancelAnimationFrame(raf);
@@ -419,6 +482,10 @@
       barLines = [];
       if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
       AudioEngine.silence();
+      const ov = document.getElementById("pause-overlay");
+      if (ov) ov.classList.add("hidden");
+      const bp = document.getElementById("btn-pause");
+      if (bp) bp.textContent = "暂停";
       state = "idle";
       el.notes[0].innerHTML = "";
       el.notes[1].innerHTML = "";
@@ -471,6 +538,9 @@
     exit,
     warmup,
     isPlaying() { return state === "playing"; },
+    isPaused() { return state === "paused"; },
+    pause,
+    resume,
     currentSong() { return song; },
     handleKey(e) {
       const lane = keyToLane(e.key);
