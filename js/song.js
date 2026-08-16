@@ -263,9 +263,9 @@
     const acc = Math.max(0, Math.min(100, Number(rate) || 0)) / 100;
     return Math.round(c * acc * acc * 100) / 100;
   }
-  /* 总 RKS = 历史最佳 N 首的 RKS 平均（含自制曲；删除自制曲后其记录一并移除） */
+  /* 总 RKS = 打出的最高 5 首 RKS 的平均，不足 5 首按 0 补位（含自制曲；删除自制曲后其记录一并移除） */
   function totalRks(count) {
-    const N = count || 10;
+    const N = count || 5;
     const list = [];
     for (const id in BestStore.data) {
       const s = getSong(id);
@@ -275,7 +275,7 @@
     }
     list.sort((a, b) => b - a);
     const top = list.slice(0, N);
-    if (!top.length) return 0;
+    while (top.length < N) top.push(0);
     return Math.round((top.reduce((s, x) => s + x, 0) / top.length) * 100) / 100;
   }
 
