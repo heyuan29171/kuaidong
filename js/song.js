@@ -255,6 +255,30 @@
     return { level: "简单", stars: 1 };
   }
 
+  /* ---------- RKS 实力评分（参考 Phigros：定数 × 达成率系数） ---------- */
+  const LEVEL_CONST = { "简单": 7, "普通": 10, "困难": 12.5, "极难": 15 };
+  function levelConstant(level) { return LEVEL_CONST[level] || 7; }
+  function rksOf(level, rate) {
+    const c = levelConstant(level);
+    const acc = Math.max(0, Math.min(100, Number(rate) || 0)) / 100;
+    return Math.round(c * acc * acc * 100) / 100;
+  }
+  /* 总 RKS = 历史最佳 N 首的 RKS 平均（含自制曲；删除自制曲后其记录一并移除） */
+  function totalRks(count) {
+    const N = count || 10;
+    const list = [];
+    for (const id in BestStore.data) {
+      const s = getSong(id);
+      const b = BestStore.data[id];
+      if (!s || !b || !(b.rate > 0)) continue;
+      list.push(rksOf(s.level, b.rate));
+    }
+    list.sort((a, b) => b - a);
+    const top = list.slice(0, N);
+    if (!top.length) return 0;
+    return Math.round((top.reduce((s, x) => s + x, 0) / top.length) * 100) / 100;
+  }
+
   function builtinTwinkle(bpm) {
     const song = {
       id: "twinkle",
@@ -405,6 +429,13 @@
       this.list = this.list.filter((s) => s.id !== id);
       saveJSON(CUSTOM_KEY, this.list);
       dbPut("custom", this.list);
+      /* 同步删除该曲的成绩 / RKS 记录，避免残留 */
+      if (BestStore.data[id]) {
+        delete BestStore.data[id];
+        saveJSON(BEST_KEY, BestStore.data);
+        dbPut("best", BestStore.data);
+        syncToFile();
+      }
     },
   };
 
@@ -631,6 +662,9 @@
     BestStore,
     Settings,
     calcDifficulty,
+    levelConstant,
+    rksOf,
+    totalRks,
     exportJSON,
     backup,
     restore,

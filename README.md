@@ -1,5 +1,15 @@
 # 快动（Kuaidong）
 
+<div align="center">
+
+# 🎮 想玩？点这里直接开玩！
+
+### 👉 [https://heyuan29171.github.io/kuaidong/](https://heyuan29171.github.io/kuaidong/)
+
+**打开即玩 · 无需安装 · 无需注册** · ⭐ 喜欢的话欢迎去仓库点个 Star
+
+</div>
+
 一个纯前端网页音游，无依赖、无构建，直接用浏览器打开 `index.html` 即可游玩。
 
 ## 玩法

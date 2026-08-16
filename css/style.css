@@ -27,6 +27,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
@@ -60,6 +61,18 @@ body {
 .nav button.active { color: var(--text); background: var(--panel); border-color: var(--accent); }
 .key-hint { font-size: 13px; color: var(--dim); }
 .key-hint b { color: var(--gold); }
+.github-link {
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 209, 102, 0.4);
+  border-radius: 20px;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.github-link:hover { background: rgba(255, 209, 102, 0.12); box-shadow: 0 0 12px rgba(255, 209, 102, 0.35); }
 
 /* ---------- 视图 ---------- */
 main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28px 40px; }
@@ -108,6 +121,15 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
   border-color: rgba(90,220,140,0.35);
   color: #a0ffc8;
 }
+.lboard-row { display: flex; align-items: center; gap: 14px; margin: 4px 0 12px; flex-wrap: wrap; }
+.rks-total { font-size: 15px; font-weight: 800; color: var(--gold); letter-spacing: 1px; }
+.rank-status {
+  font-size: 12px; padding: 5px 12px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--dim);
+}
+.rank-status.on { color: #a0ffc8; border-color: rgba(90,220,140,0.4); }
+.rank-status.off { color: #ffb3a0; border-color: rgba(255,120,80,0.4); }
+.rank-status:hover { border-color: var(--accent); }
 .song-toolbar { display: flex; align-items: center; margin: 8px 0 12px; }
 .sort-label { font-size: 13px; color: var(--dim); display: flex; align-items: center; gap: 8px; }
 .sort-label select {
@@ -340,6 +362,8 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
 }
 .result-grid b { display: block; font-size: 26px; color: var(--gold); }
 .result-grid span { font-size: 12px; color: var(--dim); }
+.res-rks-line { font-size: 15px; color: var(--gold); font-weight: 700; }
+.res-rks-line b { font-size: 24px; }
 .result-ops { display: flex; gap: 14px; }
 
 /* ---------- 编辑器 ---------- */
@@ -459,7 +483,6 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
 .touch-right { right: 0; }
 @media (hover: none) and (pointer: coarse) {
   .touch-zone { display: block; }
-  body { touch-action: none; }
 }
 
 /* ---------- 判定校准弹层 ---------- */

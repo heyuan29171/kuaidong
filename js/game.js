@@ -27,7 +27,7 @@
     res: {
       title: $("result-title"), score: $("res-score"), maxcombo: $("res-maxcombo"),
       perfect: $("res-perfect"), good: $("res-good"), miss: $("res-miss"),
-      rate: $("res-rate"), record: $("res-record"), save: $("res-save"),
+      rate: $("res-rate"), record: $("res-record"), save: $("res-save"), rks: $("res-rks"),
     },
   };
 
@@ -383,6 +383,7 @@
       el.res.miss.textContent = stats.miss;
       el.res.rate.textContent = rate + "%";
       el.res.record.textContent = "";
+      if (el.res.rks) el.res.rks.textContent = SongLib.rksOf(song.level, rate).toFixed(2);
       el.result.classList.remove("hidden");
       el.stateTip.textContent = "完成！";
 

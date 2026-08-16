@@ -19,6 +19,33 @@
     } catch (e) { return []; }
   }
 
+  /* 读取排行榜启用状态 */
+  async function fetchStatus() {
+    try {
+      const res = await fetch(API_BASE + "/status", { cache: "no-store" });
+      if (!res.ok) return { enabled: null };
+      const j = await res.json();
+      return { enabled: j && j.code === 0 ? !!j.enabled : null };
+    } catch (e) { return { enabled: null }; }
+  }
+
+  /* 站长切换排行榜启用状态（需管理口令，口令只存后端，前端不保留） */
+  async function toggleAdmin(key, enabled) {
+    try {
+      const res = await fetch(API_BASE + "/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: key, enabled: enabled }),
+      });
+      let j = null;
+      try { j = await res.json(); } catch (e) {}
+      if (j && j.code === 0) return { ok: true, enabled: !!j.enabled };
+      return { ok: false, reason: (j && j.reason) || "network" };
+    } catch (e) {
+      return { ok: false, reason: "network" };
+    }
+  }
+
   /* 提交一条成绩（云函数负责进前十校验与写入） */
   async function submit(entry) {
     try {
@@ -56,6 +83,8 @@
 
   window.Leaderboard = {
     fetchTop: fetchTop,
+    fetchStatus: fetchStatus,
+    toggleAdmin: toggleAdmin,
     submit: submit,
     maybeSubmit: maybeSubmit,
     isConfigured: function () { return true; },

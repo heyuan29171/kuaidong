@@ -40,6 +40,49 @@
     el.textContent = cnt ? "✓ 成绩已自动保存在本地（" + cnt + " 首）" : "✓ 成绩将自动保存在本地";
   }
 
+  /* 曲库顶部的实力评分（总 RKS） */
+  function updateRks() {
+    const el = $("rks-total");
+    if (!el) return;
+    el.textContent = "RKS " + SongLib.totalRks().toFixed(2);
+  }
+
+  /* 排行榜启用状态（站长可通过按钮输入口令切换） */
+  let rankStatus = null;
+  async function updateRankStatus() {
+    const el = $("rank-status");
+    if (!el) return;
+    const st = await Leaderboard.fetchStatus();
+    rankStatus = st;
+    el.className = "rank-status " + (st.enabled === true ? "on" : st.enabled === false ? "off" : "unknown");
+    el.textContent = "排行榜：" + (st.enabled === true ? "已启用" : st.enabled === false ? "已暂停" : "未知");
+  }
+  function openRankAdmin() {
+    const st = rankStatus;
+    $("rank-admin-status").textContent = "当前状态：" + (st && st.enabled === true ? "已启用" : st && st.enabled === false ? "已暂停" : "未知");
+    $("rank-admin-key").value = "";
+    $("rank-admin-msg").textContent = "输入管理口令即可启用或暂停（口令只保存在你电脑上，不暴露给玩家）";
+    $("rank-admin-modal").classList.remove("hidden");
+  }
+  async function setRankEnabled(enabled) {
+    const key = $("rank-admin-key").value.trim();
+    const msg = $("rank-admin-msg");
+    if (!key) { msg.textContent = "请先输入管理员口令"; return; }
+    msg.textContent = "正在操作…";
+    const res = await Leaderboard.toggleAdmin(key, enabled);
+    if (res.ok) {
+      msg.textContent = "✓ 排行榜已" + (res.enabled ? "启用" : "暂停");
+      rankStatus = { enabled: res.enabled };
+      updateRankStatus();
+    } else {
+      msg.textContent = "操作失败：" + ((res && res.reason) || "网络错误") + "（口令错误或未授权）";
+    }
+  }
+  $("rank-status").addEventListener("click", openRankAdmin);
+  $("btn-rank-admin-on").addEventListener("click", () => setRankEnabled(true));
+  $("btn-rank-admin-off").addEventListener("click", () => setRankEnabled(false));
+  $("btn-rank-admin-close").addEventListener("click", () => $("rank-admin-modal").classList.add("hidden"));
+
   /* 曲库排序 */
   const SORT_KEY = "kd_sort";
   function getSort() {
@@ -69,6 +112,8 @@
     const songs = sortSongs(SongLib.getAllSongs());
     list.innerHTML = "";
     updateStorageStatus();
+    updateRks();
+    updateRankStatus();
     if (!songs.length) {
       list.innerHTML = '<p class="sub">曲库为空</p>';
       return;
@@ -81,7 +126,7 @@
       const stars = "★".repeat(Math.max(1, s.stars || 1)) + "☆".repeat(4 - Math.max(1, s.stars || 1));
       const best = SongLib.BestStore.get(s.id);
       const bestTxt = best
-        ? '<div class="best">最佳 ' + best.score + " 分 · 达成 " + best.rate + "%</div>"
+        ? '<div class="best">最佳 ' + best.score + " 分 · 达成 " + best.rate + "% · RKS " + SongLib.rksOf(s.level, best.rate).toFixed(2) + "</div>"
         : '<div class="best none">暂无成绩</div>';
       card.innerHTML =
         '<div class="tag ' + (isCustom ? "custom" : "synth") + '">' +
@@ -311,7 +356,7 @@
     const rows = [];
     for (const s of songs) {
       const b = SongLib.BestStore.get(s.id);
-      rows.push({ title: s.title, artist: s.artist || "", b: b || null });
+      rows.push({ title: s.title, artist: s.artist || "", level: s.level, b: b || null });
     }
     rows.sort((a, b2) => ((b2.b ? b2.b.score : -1) - (a.b ? a.b.score : -1)));
     box.innerHTML = "";
@@ -322,14 +367,14 @@
       const head = document.createElement("div");
       head.className = "score-row";
       head.innerHTML = '<div class="score-name">共 ' + played.length + " / " + rows.length + " 首完成</div>" +
-        '<div class="score-date">最佳成绩按分数排序</div>';
+        '<div class="score-date">总 RKS ' + SongLib.totalRks().toFixed(2) + " · 最佳成绩按分数排序</div>";
       box.appendChild(head);
       for (const r of rows) {
         const d = document.createElement("div");
         d.className = "score-row" + (r.b ? "" : " none");
         d.innerHTML = r.b
           ? '<div class="score-name">' + esc(r.title) + "</div>" +
-            '<div class="score-val">' + r.b.score + " 分 · " + r.b.rate + "%</div>" +
+            '<div class="score-val">' + r.b.score + " 分 · " + r.b.rate + "% · RKS " + SongLib.rksOf(r.level, r.b.rate).toFixed(2) + "</div>" +
             '<div class="score-date">连击 ' + r.b.maxCombo + "</div>"
           : '<div class="score-name">' + esc(r.title) + "</div>" +
             '<div class="score-val">未游玩</div>';
@@ -348,6 +393,11 @@
     box.innerHTML = '<p class="sub">加载中…</p>';
     $("rank-modal").classList.remove("hidden");
     try {
+      const st = await Leaderboard.fetchStatus();
+      if (st.enabled === false) {
+        box.innerHTML = '<p class="sub">排行榜目前处于暂停状态，暂不开放</p>';
+        return;
+      }
       const top = await Leaderboard.fetchTop(song.id);
       box.innerHTML = "";
       if (!top.length) {
