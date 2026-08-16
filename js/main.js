@@ -11,11 +11,17 @@
   const views = ["menu", "game", "editor", "tutorial"];
 
   function showView(name) {
-    /* 打歌视图内锁定页面滚动，防止触屏误触导致画面移动/缩放 */
-    document.body.classList.toggle("game-locked", name === "game");
+    /* 进入打歌视图时把页面滚回顶部：让移动端地址栏收进全屏状态，避免锁定在尴尬位置挡住视野。
+       防滚防缩由游戏视图的 touch-action 与触摸事件拦截负责，不再锁死页面滚动。 */
     if (name === "game") {
-      /* 进入游戏 */
+      try { window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; } catch (e) {}
+      if (document.documentElement && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
     } else {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
       Game.exit();
     }
     if (name !== "editor") Editor.stopPlay();

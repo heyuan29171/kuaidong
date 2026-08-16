@@ -460,6 +460,15 @@
   bindTouchZone(document.getElementById("touch-left"), 0);
   bindTouchZone(document.getElementById("touch-right"), 1);
 
+  /* 打歌视图内硬拦截浏览器触摸手势（滚动/双击与捏合缩放），CSS touch-action 在部分移动浏览器上会被忽略，这里是兜底。
+     preventDefault 不影响 pointer 事件，触摸判定照常工作；仅 playing 时拦截，结算面板与返回按钮的点击不受影响。 */
+  (function lockGameGestures() {
+    const v = document.getElementById("view-game");
+    if (!v) return;
+    v.addEventListener("touchstart", (e) => { if (state === "playing") e.preventDefault(); }, { passive: false });
+    v.addEventListener("touchmove", (e) => { if (state === "playing") e.preventDefault(); }, { passive: false });
+  })();
+
   window.Game = {
     loadSong,
     loadAudio,

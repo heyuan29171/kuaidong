@@ -475,7 +475,6 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-body.game-locked { overflow: hidden; }
 .touch-zone {
   position: absolute;
   top: 0; bottom: 0;
