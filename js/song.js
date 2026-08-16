@@ -517,7 +517,7 @@
     return true;
   }
 
-  /* ---------- 清空本机记录（成绩 + 自定义曲 + 设置 + 自制曲音频；保留内置曲音频缓存与文件夹句柄） ---------- */
+  /* 清空玩家记录：只删成绩、自编曲、自制曲音频这三类用户数据；游戏资源（内置曲音频缓存）与文件夹授权一律不动 */
   function clearAll() {
     try { localStorage.removeItem(BEST_KEY); } catch (e) {}
     try { localStorage.removeItem(CUSTOM_KEY); } catch (e) {}
@@ -535,8 +535,9 @@
               rq.onerror = () => res([]);
             });
             for (const k of keys) {
-              if (k === "dirHandle" || (typeof k === "string" && k.indexOf("builtin_audio_") === 0)) continue;
-              try { st.delete(k); } catch (e) {}
+              if (typeof k === "string" && (k === "best" || k === "custom" || k.indexOf("audio_") === 0)) {
+                try { st.delete(k); } catch (e) {}
+              }
             }
           }
         } catch (e) {}

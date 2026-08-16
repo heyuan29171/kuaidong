@@ -1,8 +1,8 @@
-# 快动（Kuaidong）
+# 快动 Kuaidong
 
 <div align="center">
 
-# 🎮 想玩？点这里直接开玩！
+# 🎮 点这里直接开玩
 
 ### 👉 [https://heyuan29171.github.io/kuaidong/](https://heyuan29171.github.io/kuaidong/)
 
@@ -10,62 +10,48 @@
 
 </div>
 
-一个纯前端网页音游，无依赖、无构建，直接用浏览器打开 `index.html` 即可游玩。
+一个纯前端网页音游，没有依赖、不用构建，浏览器打开 `index.html` 就能玩。
 
 ## 玩法
 
-- 双轨下落式音游，用 `A S D F` / `J K L ;` 击打音符，支持长按
-- 按键音效与判定音效跟随音符音调
-- 自带内置曲目，也可**上传本地音频作为 BGM**
-- **移动端**（触屏）可直接游玩，两轨各有一个触摸区域
-- 每首**内置曲**有**全局排行榜**（自制的歌不上榜，见下节）
-
-## 全局排行榜
-
-排行榜采用**自托管方案**：数据存在你自己电脑的本地磁盘上，完全免费、无需实名、不暴露任何 token。
-
-```
-玩家 → GitHub Pages 前端 → cpolar 内网穿透 → 本机 Node 后端(8787) → server/data/leaderboard.json
-```
-
-游完一局如果进入前十，会弹窗让你输入 ID 上榜。
-
-### 部署 / 运行
-
-1. **启动后端**：双击 `server/start.bat`（需要本机安装 Node.js），看到 `排行榜服务已启动，端口 8787` 即成功。**这个窗口要一直开着**，关掉榜单就下线。
-2. **内网穿透**：本机安装 cpolar 并保持服务运行，把 `http://127.0.0.1:8787` 映射成公网地址（如 `https://xxxxx.cpolar.top`）。
-3. **前端指向**：`js/leaderboard.js` 第 9 行的 `API_BASE` 填 cpolar 给出的公网地址（形如 `https://xxxxx.cpolar.top/api/leaderboard`），然后 push 到 GitHub，GitHub Pages 自动部署。
-
-### 接口
-
-| 方法 | 路径 | 说明 |
-| --- | --- | --- |
-| GET | `/api/leaderboard?song=<songId>` | 读取某首歌前十 |
-| POST | `/api/leaderboard` | 提交一条成绩（服务端校验分数与进前十，防刷限流） |
-
-### 维护注意
-
-- **重启电脑后**：重新双击 `server/start.bat` 启动后端，并确认 cpolar 服务在运行。
-- **cpolar 免费版域名重启后可能变化**：一旦排行榜打不开，登录 [cpolar dashboard](https://dashboard.cpolar.com) 查新地址，更新 `js/leaderboard.js` 的 `API_BASE` 并重新推送。
-- **数据备份**：排行榜数据就是 `server/data/leaderboard.json` 一个文件，定期拷贝一份即可（例如同步到本仓库或云盘）。
-- **数据安全**：`server/data/` 已被 `.gitignore` 排除，本地成绩不会上传到 GitHub。
+- 双轨下落式，键盘 `A S D F`（左轨）和 `J K L ;`（右轨）击打音符，支持长按
+- 判定分 perfect / good / miss，按键音效跟随音符音调
+- 内置 7 首合成曲，也可以上传本地音频当 BGM
+- 手机端照常玩，两轨各有触摸区域
 
 ## 谱面编辑器
 
-- 手动编辑：点击添加音符、Shift+点击加长按、拖动移动、右键删除、↑/↓ 调音高
-- **自动生成谱面**：可选「简单 / 普通 / 困难」难度
-  - 自动检测音频 **BPM** 并写入谱面
-  - 按音频能量分段，强弱段落密度不同，自动加入**双押与长条**
-  - 音符**音调跟随 BGM**（FFT 音高检测）
-- 时间轴支持滚轮滑动、Ctrl+滚轮缩放，方便精修细节
+- 点击加音符、Shift+点击加长按、拖动移动、右键删除、↑/↓ 调音高
+- 时间轴滚轮滑动、Ctrl+滚轮缩放，方便精修
+- **自动生成谱面**：选「简单 / 普通 / 困难」难度，自动检测 BPM、按音频强弱配音符密度，自动加双押和长条，音调跟 BGM 走
 
-## 数据存储
+## RKS 实力评分
 
-所有用户数据（成绩、自编曲、上传的 BGM）都保存在**浏览器本地**（IndexedDB / localStorage / 你授权的文件夹），不会上传到 GitHub 或任何服务器。用户存档位于 `cundang/`，已被 `.gitignore` 排除，不会随仓库分享。
+参考 Phigros，RKS = 定数 × 达成率²。达成率按音符权重算：perfect 记 1、good 记 0.8、miss 记 0，**只有全 perfect 才是 100%**。总 RKS 取历史最佳 10 首的平均，自制曲按系统难度同样计分。
+
+## 全局排行榜
+
+- 内置曲一局打完，进前十就能输入 ID 上榜；自制曲不上榜
+- **自托管**：数据存在你自己电脑的磁盘上，前端只管展示
+- 曲库页面能看到排行榜当前开没开，站长输管理口令可随时启用 / 暂停
+
+### 部署三步
+
+1. **启动后端**：双击 `server/start.bat`（本机要装 Node.js），看到「排行榜服务已启动」即可。这个窗口别关，关了榜单就下线。
+2. **内网穿透**：装 cpolar 并保持运行，把 `http://127.0.0.1:8787` 映射成公网地址（如 `https://xxxxx.cpolar.top`）。
+3. **前端指过去**：把 `js/leaderboard.js` 开头的 `API_BASE` 填成 cpolar 给你的公网地址，push 到 GitHub，Pages 自动部署。
+
+排行数据就是 `server/data/leaderboard.json` 一个文件，后端每天自动备份一份到 `server/data/backups/`，保留最近 30 份。首次启动会生成一个管理员口令（打印在控制台窗口里，也可用环境变量 `KD_ADMIN_KEY` 自己定）。
+
+> 重启电脑后记得重新双击 `start.bat`、确认 cpolar 在跑。免费版 cpolar 的域名重启后可能变，变了就更新 `API_BASE` 再推一次。
+
+## 本地存档
+
+成绩、自编曲、BGM 都存在浏览器本地（或你授权的文件夹），随时用「导出存档」备份、用「导入存档」恢复、用「清空本地记录」重来。
 
 ## 运行
 
-直接用浏览器打开 `index.html`，或用任意静态服务器托管本目录，例如：
+直接打开 `index.html`，或起个静态服务器：
 
 ```sh
 python -m http.server 8000
@@ -74,9 +60,9 @@ python -m http.server 8000
 ## 技术
 
 - 原生 JavaScript + Canvas，零第三方依赖
-- Web Audio API：BGM 播放、音高/节拍分析、内置曲离线渲染
-- IndexedDB：音频与存档持久化
-- 排行榜后端：Node.js 零依赖 HTTP 服务（`server/server.js`），数据存本地 JSON
+- Web Audio API：BGM 播放、音高 / 节拍分析、内置曲离线渲染
+- IndexedDB + localStorage：音频与存档持久化
+- 排行榜后端：Node.js 单文件 HTTP 服务，数据存本地 JSON
 
 ## License
 
