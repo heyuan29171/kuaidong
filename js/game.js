@@ -312,7 +312,7 @@
       AudioEngine.sfxHit("perfect", currentRoot);
     } else if (result === "good") {
       stats.good++;
-      stats.score += 50;
+      stats.score += 80;
       stats.combo++;
       AudioEngine.sfxHit("good", currentRoot);
     } else {
@@ -374,7 +374,7 @@
       if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
       AudioEngine.silence();
       const total = stats.perfect + stats.good + stats.miss;
-      const rate = total ? Math.round(((stats.perfect + stats.good) / total) * 100) : 0;
+      const rate = total ? Math.round(((stats.perfect + stats.good * 0.8) / total) * 100) : 0;
       el.res.title.textContent = song.title;
       el.res.score.textContent = stats.score;
       el.res.maxcombo.textContent = stats.maxCombo;
