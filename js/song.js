@@ -551,10 +551,14 @@
     });
   }
 
-  /* 后台预渲染所有内置曲音频（缓存缺失时用于恢复声音） */
+  /* 后台空闲时逐首预渲染内置曲音频（缓存缺失时用于恢复声音）；
+     用 requestIdleCallback 逐首调度并让出主线程，打歌进行中跳过，避免渲染卡顿影响游戏 */
   async function preRenderBuiltin() {
     for (const s of BUILTIN) {
+      await nextIdle();
+      if (window.Game && window.Game.isPlaying()) return;
       try { await ensureBuiltinAudio(s); } catch (e) {}
+      await nextIdle();
     }
   }
 
@@ -628,17 +632,36 @@
   function saveAudio(id, arrayBuffer) { return dbPut("audio_" + id, arrayBuffer); }
   async function getAudio(id) { return dbGet("audio_" + id); }
 
-  /* 内置曲：把旋律+伴奏离线渲染成固定音频并存本地（渲染一次，之后直接播放） */
+  /* 内置曲：把旋律+伴奏离线渲染成固定音频并存本地（渲染一次，之后直接播放）。
+     同一首歌的渲染加锁复用，避免预渲染与进游戏时重复渲染同一首导致卡顿 */
+  const builtinRenderQueue = {};
   async function ensureBuiltinAudio(song) {
     const key = "builtin_audio_v3_" + song.id;
     let buf = await dbGet(key);
     if (!buf) {
-      try {
-        buf = await window.AudioEngine.renderSong(song.notes, song.bpm, song.prog);
-        if (buf) await dbPut(key, buf);
-      } catch (e) { buf = null; }
+      if (builtinRenderQueue[key]) {
+        buf = await builtinRenderQueue[key];
+      } else {
+        builtinRenderQueue[key] = (async () => {
+          try {
+            const b = await window.AudioEngine.renderSong(song.notes, song.bpm, song.prog);
+            if (b) await dbPut(key, b);
+            return b;
+          } catch (e) { return null; }
+        })();
+        buf = await builtinRenderQueue[key];
+        delete builtinRenderQueue[key];
+      }
     }
     return buf;
+  }
+
+  /* 空闲回调：等浏览器空闲再干活，避免挤占主线程造成卡顿 */
+  function nextIdle() {
+    return new Promise((r) => {
+      if (window.requestIdleCallback) window.requestIdleCallback(r, { timeout: 2000 });
+      else setTimeout(r, 60);
+    });
   }
 
   /* 页面加载：优先从 IndexedDB 恢复数据（file:// 下比 localStorage 稳定） */

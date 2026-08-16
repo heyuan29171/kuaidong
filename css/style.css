@@ -27,7 +27,6 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  min-height: 100dvh;
   overflow-x: hidden;
 }
 
@@ -468,13 +467,7 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
 .footer a:hover { text-decoration: underline; }
 
 /* ---------- 移动端触摸打歌 ---------- */
-/* 整个打歌视图内的触摸都不参与页面滚动与缩放（仅游戏视图内生效，不影响曲库等页面） */
-#view-game, #view-game * {
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
+/* 只在触摸打歌区（左右半屏 touch-zone）禁手势，其余区域保留滚动/缩放，方便玩家调整 */
 .touch-zone {
   position: absolute;
   top: 0; bottom: 0;
