@@ -11,6 +11,8 @@
   const views = ["menu", "game", "editor", "tutorial"];
 
   function showView(name) {
+    /* 打歌视图内锁定页面滚动，防止触屏误触导致画面移动/缩放 */
+    document.body.classList.toggle("game-locked", name === "game");
     if (name === "game") {
       /* 进入游戏 */
     } else {
