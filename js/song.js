@@ -517,17 +517,39 @@
     return true;
   }
 
-  /* ---------- 清空本机全部记录（成绩 + 自定义曲 + 设置 + 音频缓存） ---------- */
+  /* ---------- 清空本机记录（成绩 + 自定义曲 + 设置 + 自制曲音频；保留内置曲音频缓存与文件夹句柄） ---------- */
   function clearAll() {
     try { localStorage.removeItem(BEST_KEY); } catch (e) {}
     try { localStorage.removeItem(CUSTOM_KEY); } catch (e) {}
     try { localStorage.removeItem(Settings.key); } catch (e) {}
     return new Promise((resolve) => {
-      try {
-        const req = indexedDB.deleteDatabase(DB_NAME);
-        req.onsuccess = req.onerror = req.onblocked = () => resolve();
-      } catch (e) { resolve(); }
+      (async () => {
+        try {
+          const db = await openDB();
+          if (db) {
+            const tx = db.transaction(DB_STORE, "readwrite");
+            const st = tx.objectStore(DB_STORE);
+            const keys = await new Promise((res) => {
+              const rq = st.getAllKeys();
+              rq.onsuccess = () => res(rq.result || []);
+              rq.onerror = () => res([]);
+            });
+            for (const k of keys) {
+              if (k === "dirHandle" || (typeof k === "string" && k.indexOf("builtin_audio_") === 0)) continue;
+              try { st.delete(k); } catch (e) {}
+            }
+          }
+        } catch (e) {}
+        resolve();
+      })();
     });
+  }
+
+  /* 后台预渲染所有内置曲音频（缓存缺失时用于恢复声音） */
+  async function preRenderBuiltin() {
+    for (const s of BUILTIN) {
+      try { await ensureBuiltinAudio(s); } catch (e) {}
+    }
   }
 
   /* ---------- 文件夹持久化（File System Access API + IndexedDB 句柄） ---------- */
@@ -690,5 +712,6 @@
     saveAudio,
     getAudio,
     ensureBuiltinAudio,
+    preRenderBuiltin,
   };
 })();

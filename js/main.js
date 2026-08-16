@@ -580,7 +580,10 @@
   window.addEventListener("resize", () => Editor.redraw());
 
   /* 首次启动：确保音频上下文可被用户手势解锁 */
-  document.addEventListener("pointerdown", () => AudioEngine.ensureCtx(), { once: true });
+  document.addEventListener("pointerdown", () => {
+    if (!AudioEngine.ensureCtx()) return;
+    if (window.SongLib && SongLib.preRenderBuiltin) SongLib.preRenderBuiltin();
+  }, { once: true });
 
   window.Main = { refresh, showView, showRankSubmit };
 
