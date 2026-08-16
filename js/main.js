@@ -522,6 +522,14 @@
     e.target.value = "";
   });
 
+  /* ---------- 清空本地记录 ---------- */
+  $("btn-clear-all").addEventListener("click", async () => {
+    if (!confirm("将清空本机的全部成绩、RKS、自定义曲与设置，且不可恢复。确定清空？")) return;
+    await SongLib.clearAll();
+    refresh();
+    alert("本地记录已清空");
+  });
+
   /* ---------- 保存到本地文件夹（File System Access API） ---------- */
   $("btn-dir").addEventListener("click", async () => {
     if (!window.showDirectoryPicker) {

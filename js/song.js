@@ -249,14 +249,14 @@
     const holdBonus = notes.reduce((s, n) => s + (n.dur || 0), 0);
     const playLen = Math.max(1, (notes[notes.length - 1].time || 1) + 1 + holdBonus * 0.4);
     const nps = notes.length / playLen;
-    if (nps >= 2.4) return { level: "极难", stars: 4 };
-    if (nps >= 1.6) return { level: "困难", stars: 3 };
-    if (nps >= 1.0) return { level: "普通", stars: 2 };
+    if (nps >= 4.0) return { level: "极难", stars: 4 };
+    if (nps >= 2.3) return { level: "困难", stars: 3 };
+    if (nps >= 1.7) return { level: "普通", stars: 2 };
     return { level: "简单", stars: 1 };
   }
 
   /* ---------- RKS 实力评分（参考 Phigros：定数 × 达成率系数） ---------- */
-  const LEVEL_CONST = { "简单": 7, "普通": 10, "困难": 12.5, "极难": 15 };
+  const LEVEL_CONST = { "简单": 5, "普通": 8, "困难": 11, "极难": 14 };
   function levelConstant(level) { return LEVEL_CONST[level] || 7; }
   function rksOf(level, rate) {
     const c = levelConstant(level);
@@ -517,6 +517,19 @@
     return true;
   }
 
+  /* ---------- 清空本机全部记录（成绩 + 自定义曲 + 设置 + 音频缓存） ---------- */
+  function clearAll() {
+    try { localStorage.removeItem(BEST_KEY); } catch (e) {}
+    try { localStorage.removeItem(CUSTOM_KEY); } catch (e) {}
+    try { localStorage.removeItem(Settings.key); } catch (e) {}
+    return new Promise((resolve) => {
+      try {
+        const req = indexedDB.deleteDatabase(DB_NAME);
+        req.onsuccess = req.onerror = req.onblocked = () => resolve();
+      } catch (e) { resolve(); }
+    });
+  }
+
   /* ---------- 文件夹持久化（File System Access API + IndexedDB 句柄） ---------- */
   let dirHandle = null;
   const DB_NAME = "kuaidong_db";
@@ -668,6 +681,7 @@
     exportJSON,
     backup,
     restore,
+    clearAll,
     storageOK,
     setDirHandle,
     saveToFile,

@@ -306,6 +306,27 @@ function shutdown() {
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
+/* 自动备份：每天首次运行时备份一份 leaderboard.json 到 data/backups/，保留最近 30 份 */
+const BACKUP_DIR = path.join(DATA_DIR, "backups");
+function backupNow() {
+  try {
+    if (!fs.existsSync(DATA_FILE)) return;
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const d = new Date();
+    const stamp = d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+    const target = path.join(BACKUP_DIR, "leaderboard-" + stamp + ".json");
+    if (fs.existsSync(target)) return;
+    fs.copyFileSync(DATA_FILE, target);
+    console.log("已备份排行榜数据 -> data/backups/leaderboard-" + stamp + ".json");
+    const files = fs.readdirSync(BACKUP_DIR).filter((f) => f.endsWith(".json")).sort();
+    while (files.length > 30) fs.unlinkSync(path.join(BACKUP_DIR, files.shift()));
+  } catch (e) {
+    console.error("备份失败：" + e.message);
+  }
+}
+backupNow();
+setInterval(backupNow, 60 * 60 * 1000);
+
 load();
 saveNow();
 loadSettings();
