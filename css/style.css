@@ -180,12 +180,13 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
 .import-box { margin-top: 22px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
 /* ---------- 游戏 ---------- */
-.game-head { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
-.game-info { display: flex; flex-direction: column; flex: 1; }
-.song-name { font-size: 20px; font-weight: 700; }
-.song-meta { font-size: 12px; color: var(--dim); }
-.hud { display: flex; gap: 22px; }
-.hud-item { font-size: 13px; color: var(--dim); }
+.game-head { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; flex-wrap: nowrap; }
+.game-head .btn { flex-shrink: 0; white-space: nowrap; }
+.game-info { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.song-name { font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.song-meta { font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud { display: flex; gap: 12px; flex-shrink: 0; white-space: nowrap; }
+.hud-item { font-size: 13px; color: var(--dim); flex-shrink: 0; }
 .hud-item b { color: var(--text); font-size: 18px; margin-left: 4px; }
 
 .play-area {
