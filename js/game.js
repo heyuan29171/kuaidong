@@ -111,7 +111,7 @@
         return true; /* 无 BGM 的自定义曲，只保留音符音效 */
       }
       if (state === "playing" && !bgmSrc && audioBuf) {
-        bgmSrc = AudioEngine.playBuffer(audioBuf, AudioEngine.currentTime() + 0.05, false);
+        bgmSrc = AudioEngine.playBuffer(audioBuf, AudioEngine.currentTime() + 0.05, false, 0, true);
       }
       return !!audioBuf;
     } catch (e) { console.warn("BGM 加载失败：", e); return false; }
@@ -164,7 +164,7 @@
     el.notes[0].innerHTML = "";
     el.notes[1].innerHTML = "";
 
-    if (audioBuf) bgmSrc = AudioEngine.playBuffer(audioBuf, baseTime + songOffset, false);
+    if (audioBuf) bgmSrc = AudioEngine.playBuffer(audioBuf, baseTime + songOffset, false, 0, true);
 
     const spb = 60 / song.bpm;
     const prog = (song.prog && song.prog.length) ? song.prog : [{ r: 60, t: 4 }, { r: 55, t: 4 }, { r: 57, t: 3 }, { r: 53, t: 4 }];
@@ -372,7 +372,7 @@
       raf = null;
       document.querySelectorAll(".beat-line").forEach((x) => x.remove());
       barLines = [];
-      if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
+      AudioEngine.stopBGM(); bgmSrc = null;
       AudioEngine.silence();
       const total = stats.perfect + stats.good + stats.miss;
       const rate = total ? Math.round(((stats.perfect + stats.good * 0.8) / total) * 100) : 0;
@@ -416,7 +416,7 @@
     pausedAt = elapsed();
     cancelAnimationFrame(raf); raf = null;
     clearInterval(timer); timer = null;
-    if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
+    AudioEngine.stopBGM(); bgmSrc = null;
     AudioEngine.silence();
     const ov = document.getElementById("pause-overlay");
     if (ov) ov.classList.remove("hidden");
@@ -435,8 +435,10 @@
     /* 重新对齐时间轴：让 elapsed() 从 resumeTime 继续 */
     baseTime = t0 - resumeTime - offset;
     /* 重新播放 BGM，从 resumeTime 对应的音频位置继续 */
+    /* 播放前先停掉所有残留 BGM，确保不会与旧音乐叠加 */
+    AudioEngine.stopBGM();
     const bgmOff = Math.max(0, resumeTime - songOffset + offset);
-    if (audioBuf) bgmSrc = AudioEngine.playBuffer(audioBuf, t0 + songOffset, false, bgmOff);
+    if (audioBuf) bgmSrc = AudioEngine.playBuffer(audioBuf, t0 + songOffset, false, bgmOff, true);
     /* 重建节拍/和弦更新计时器 */
     const spb = 60 / song.bpm;
     beatIndex = Math.floor(resumeTime / spb);
@@ -476,7 +478,7 @@
     if (state !== "paused") return;
     clearInterval(timer); timer = null;
     cancelAnimationFrame(raf); raf = null;
-    if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
+    AudioEngine.stopBGM(); bgmSrc = null;
     AudioEngine.silence();
     const ov = document.getElementById("pause-overlay");
     if (ov) ov.classList.add("hidden");
@@ -493,7 +495,7 @@
       raf = null;
       document.querySelectorAll(".beat-line").forEach((x) => x.remove());
       barLines = [];
-      if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
+      AudioEngine.stopBGM(); bgmSrc = null;
       AudioEngine.silence();
       const ov = document.getElementById("pause-overlay");
       if (ov) ov.classList.add("hidden");

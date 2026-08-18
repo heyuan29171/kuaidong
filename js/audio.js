@@ -8,6 +8,7 @@
 
   let ctx = null;
   let master = null;
+  const bgmSources = new Set();   // 正在播放的 BGM source（统一管理，避免残留叠加）
 
   function ensureCtx() {
     if (!ctx) {
@@ -122,8 +123,8 @@
     return c.decodeAudioData(arrayBuffer);
   }
 
-  /* 播放 AudioBuffer（作为 BGM），返回 AudioBufferSourceNode */
-  function playBuffer(buf, when, loop, offset) {
+  /* 播放 AudioBuffer（作为 BGM），返回 AudioBufferSourceNode；track=true 时纳入统一管理，stopBGM() 可一次全部停止 */
+  function playBuffer(buf, when, loop, offset, track) {
     const c = ensureCtx();
     if (!c) return null;
     const src = c.createBufferSource();
@@ -133,8 +134,20 @@
     g.gain.value = 0.7;
     src.connect(g);
     g.connect(master);
+    if (track) {
+      bgmSources.add(src);
+      src.onended = () => bgmSources.delete(src);
+    }
     src.start(when || 0, offset || 0);
     return src;
+  }
+
+  /* 停止所有正在播放的 BGM（暂停 / 重开 / 退出 / 结算前统一调用，确保不会新旧 BGM 叠加） */
+  function stopBGM() {
+    const c = ensureCtx();
+    if (!c) { bgmSources.clear(); return; }
+    for (const s of bgmSources) { try { s.stop(); } catch (e) {} }
+    bgmSources.clear();
   }
 
   /* 清脆铃音：基频三角波 + 高频泛音，快速衰减 */
@@ -366,6 +379,7 @@
     metronome,
     decodeFile,
     playBuffer,
+    stopBGM,
     playPad,
     renderSong,
     sfxHit,
