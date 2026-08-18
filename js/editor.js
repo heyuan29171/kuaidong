@@ -909,6 +909,7 @@
     stopPlay,
     save,
     exportJSON,
+    share() { return SongLib.shareEncode(buildSong()); },
     clear,
     redraw: draw,
     getNotes() { return notes.slice(); },

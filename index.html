@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>快动 · 双轨下落音乐游戏</title>
-<link rel="stylesheet" href="css/style.css?v=36" />
+<link rel="stylesheet" href="css/style.css?v=37" />
 </head>
 <body>
 
@@ -56,6 +56,7 @@
       <button id="btn-dir" class="btn primary">保存到本地文件夹</button>
       <input type="file" id="backup-file" accept="application/json" hidden />
       <button id="btn-restore" class="btn">导入存档</button>
+      <button id="btn-share-import" class="btn">粘贴谱面口令</button>
       <button id="btn-clear-all" class="btn ghost">清空本地记录</button>
       <span class="hint">若刷新后成绩丢失，点「保存到本地文件夹」可自动恢复</span>
     </div>
@@ -104,7 +105,10 @@
         <div class="pause-box">
           <h3>已暂停</h3>
           <p>继续后从暂停处往前 3 秒开始（最多回到开头），已打过的音符不用重打</p>
-          <button id="btn-pause-resume" class="btn primary">继续</button>
+          <div class="pause-btns">
+            <button id="btn-pause-resume" class="btn primary">继续</button>
+            <button id="btn-pause-restart" class="btn">重新开始</button>
+          </div>
         </div>
       </div>
     </div>
@@ -145,6 +149,7 @@
       <button id="btn-clear" class="btn ghost">清空</button>
       <button id="btn-save" class="btn primary">保存到曲库</button>
       <button id="btn-export" class="btn">导出 JSON</button>
+      <button id="btn-share" class="btn">复制分享口令</button>
       <input type="file" id="ed-audio-file" accept="audio/*" hidden />
       <button id="btn-ed-audio" class="btn">导入 BGM</button>
       <label>难度 <select id="ed-gen-diff">
@@ -321,11 +326,11 @@
 
 <footer class="footer">双轨下落 · 内置合成曲 · 谱面编辑器 · 纯前端无需安装 · <a href="https://github.com/heyuan29171/kuaidong" target="_blank" rel="noopener">GitHub 仓库</a> · <a href="https://github.com/heyuan29171/kuaidong" target="_blank" rel="noopener">点个 ⭐</a></footer>
 
-<script src="js/song.js?v=37"></script>
+<script src="js/song.js?v=38"></script>
   <script src="js/audio.js?v=31"></script>
-  <script src="js/game.js?v=34"></script>
-  <script src="js/leaderboard.js?v=35"></script>
+  <script src="js/game.js?v=35"></script>
+  <script src="js/leaderboard.js?v=36"></script>
   <script src="js/editor.js?v=30"></script>
-  <script src="js/main.js?v=37"></script>
+  <script src="js/main.js?v=38"></script>
 </body>
 </html>

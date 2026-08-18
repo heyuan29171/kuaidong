@@ -472,6 +472,19 @@
     if (bp) bp.textContent = "暂停";
   }
 
+  function restart() {
+    if (state !== "paused") return;
+    clearInterval(timer); timer = null;
+    cancelAnimationFrame(raf); raf = null;
+    if (bgmSrc) { try { bgmSrc.stop(); } catch (e) {} bgmSrc = null; }
+    AudioEngine.silence();
+    const ov = document.getElementById("pause-overlay");
+    if (ov) ov.classList.add("hidden");
+    const bp = document.getElementById("btn-pause");
+    if (bp) bp.textContent = "暂停";
+    start();
+  }
+
   function exit() {
     if (state === "playing" || state === "paused" || state === "finished") {
       clearInterval(timer);
@@ -541,6 +554,7 @@
     isPaused() { return state === "paused"; },
     pause,
     resume,
+    restart,
     currentSong() { return song; },
     handleKey(e) {
       const lane = keyToLane(e.key);

@@ -717,6 +717,106 @@
     return JSON.stringify(data, null, 2);
   }
 
+  /* ---------- 谱面分享口令（KD1 紧凑编码：标题/艺术家/定数 + 音符位流 + 校验和） ---------- */
+  function shareEncode(song) {
+    const bytes = [];
+    const put8 = (v) => bytes.push(v & 0xff);
+    const put16 = (v) => { put8(v >> 8); put8(v); };
+    const utf8 = (s) => unescape(encodeURIComponent(String(s == null ? "" : s)));
+    const t = utf8(song.title || "未命名曲目");
+    const a = utf8(song.artist || "");
+    put8(0x4b); put8(0x44); put8(0x31);                       /* "KD1" */
+    put8(Math.min(255, t.length));
+    for (let i = 0; i < t.length; i++) put8(t.charCodeAt(i));
+    put8(Math.min(255, a.length));
+    for (let i = 0; i < a.length; i++) put8(a.charCodeAt(i));
+    put16(Math.max(0, Math.min(65535, Math.round(song.bpm * 100))));
+    put16((Math.round((song.offset || 0) * 1000) + 32768) & 0xffff);
+    put8(Math.max(0, Math.min(100, Math.round((song.volume || 0.3) * 100))));
+    const notes = song.notes || [];
+    put16(notes.length);
+    let acc = 0, nbits = 0;
+    const put = (val, len) => {
+      for (let i = len - 1; i >= 0; i--) {
+        acc = (acc << 1) | ((val >> i) & 1);
+        if (++nbits === 8) { bytes.push(acc); acc = 0; nbits = 0; }
+      }
+    };
+    for (const nt of notes) {
+      put(Math.max(0, Math.min(262143, Math.round(nt.time * 1000))), 18);   /* 时间 1ms 精度 */
+      put(nt.lane === 1 ? 1 : 0, 1);
+      put((nt.midi != null ? nt.midi : 72) & 127, 7);
+      const dur = nt.dur ? Math.min(32767, Math.round(nt.dur * 100)) : 0;
+      put(dur > 0 ? 1 : 0, 1);
+      if (dur > 0) put(dur, 15);
+    }
+    if (nbits > 0) bytes.push((acc << (8 - nbits)) & 0xff);
+    let sum = 0;
+    for (const b of bytes) sum = (sum ^ b) & 0xff;
+    bytes.push(sum);
+    let bin = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.slice(i, i + 0x8000));
+    return "KD1-" + btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  function shareDecode(code) {
+    let s = String(code || "").trim();
+    if (s.indexOf("KD1-") === 0) s = s.slice(4);
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    const bin = atob(s);
+    const bytes = [];
+    for (let i = 0; i < bin.length; i++) bytes.push(bin.charCodeAt(i) & 0xff);
+    if (bytes.length < 14) throw new Error("内容太短，不是有效的谱面口令");
+    let sum = 0;
+    for (let i = 0; i < bytes.length - 1; i++) sum = (sum ^ bytes[i]) & 0xff;
+    if (sum !== bytes[bytes.length - 1]) throw new Error("校验失败：口令可能复制不完整或有误");
+    let p = 0;
+    const read = (len) => {
+      if (p + len > bytes.length - 1) throw new Error("内容不完整");
+      let v = 0;
+      for (let i = 0; i < len; i++) v = (v << 8) | (bytes[p++] & 0xff);
+      return v;
+    };
+    const take = (len) => {
+      if (p + len > bytes.length - 1) throw new Error("内容不完整");
+      const b = bytes.slice(p, p + len); p += len; return b;
+    };
+    const u8 = (b) => decodeURIComponent(escape(String.fromCharCode.apply(null, b)));
+    if (read(3) !== 0x4b4431) throw new Error("不是有效的谱面口令");
+    const title = u8(take(read(1)));
+    const artist = u8(take(read(1)));
+    const bpm = read(2) / 100;
+    const offset = (read(2) - 32768) / 1000;
+    const volume = read(1) / 100;
+    const n = read(2);
+    if (n > 20000) throw new Error("音符数量异常");
+    let acc = 0, nbits = 0;
+    const get = (len) => {
+      let v = 0;
+      for (let i = 0; i < len; i++) {
+        if (nbits === 0) {
+          if (p >= bytes.length - 1) throw new Error("内容不完整");
+          acc = bytes[p++]; nbits = 8;
+        }
+        v = (v << 1) | ((acc >> 7) & 1);
+        acc = (acc << 1) & 0xff;
+        nbits--;
+      }
+      return v;
+    };
+    const notes = [];
+    for (let i = 0; i < n; i++) {
+      const time = get(18) / 1000;
+      const lane = get(1);
+      const midi = get(7);
+      const hasDur = get(1);
+      const dur = hasDur ? get(15) / 100 : 0;
+      notes.push({ time: +time.toFixed(3), lane: lane, midi: midi, dur: dur ? +dur.toFixed(2) : 0 });
+    }
+    return { title: title, artist: artist, bpm: bpm, offset: offset, volume: volume, notes: notes };
+  }
+
   window.SongLib = {
     midiToFreq,
     getAllSongs,
@@ -730,6 +830,8 @@
     rksOf,
     totalRks,
     exportJSON,
+    shareEncode,
+    shareDecode,
     backup,
     restore,
     clearAll,

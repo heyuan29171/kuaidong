@@ -142,7 +142,8 @@
         '<div class="ops">' +
         '<button class="btn primary" data-act="play">游玩</button>' +
         (isCustom ? "" : '<button class="btn" data-act="rank">排行榜</button>') +
-        (isCustom ? '<button class="btn" data-act="edit">编辑谱面</button>' : "") +
+        (isCustom ? '<button class="btn" data-act="edit">编辑谱面</button>' +
+          '<button class="btn" data-act="share">分享</button>' : "") +
         "</div>" +
         (isCustom ? '<button class="del" data-act="del" title="删除">×</button>' : "");
       card.querySelector('[data-act="play"]').addEventListener("click", () => playSong(s));
@@ -150,6 +151,16 @@
       if (rankBtn) rankBtn.addEventListener("click", () => openRank(s));
       const editBtn = card.querySelector('[data-act="edit"]');
       if (editBtn) editBtn.addEventListener("click", () => editSong(s));
+      const shareBtn = card.querySelector('[data-act="share"]');
+      if (shareBtn) shareBtn.addEventListener("click", async () => {
+        try {
+          const code = SongLib.shareEncode(s);
+          await copyText(code);
+          alert("《" + s.title + "》的分享口令已复制。把口令和 BGM 文件一起发给朋友，对方在曲库点「粘贴谱面口令」即可导入。");
+        } catch (e) {
+          alert("生成口令失败：" + (e && e.message ? e.message : e));
+        }
+      });
       if (isCustom) {
         card.querySelector('[data-act="del"]').addEventListener("click", () => {
           if (confirm("删除《" + s.title + "》？")) {
@@ -166,6 +177,22 @@
     return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
     }[c]));
+  }
+
+  /* 复制文本到剪贴板（Clipboard API 失败时降级为临时 textarea 复制） */
+  async function copyText(txt) {
+    try {
+      await navigator.clipboard.writeText(txt);
+      return;
+    } catch (e) {}
+    const ta = document.createElement("textarea");
+    ta.value = txt;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e2) {}
+    ta.remove();
   }
 
   async function playSong(song) {
@@ -230,6 +257,11 @@
   const pauseOverlay = $("pause-overlay");
   if (pauseOverlay) pauseOverlay.addEventListener("pointerdown", () => { if (Game.isPaused()) Game.resume(); });
   $("btn-pause-resume").addEventListener("click", () => Game.resume());
+  const btnPauseRestart = $("btn-pause-restart");
+  if (btnPauseRestart) {
+    btnPauseRestart.addEventListener("pointerdown", (e) => e.stopPropagation());
+    btnPauseRestart.addEventListener("click", () => Game.restart());
+  }
   $("btn-game-back").addEventListener("click", () => showView("menu"));
   $("btn-retry").addEventListener("click", () => Game.start());
   $("btn-to-menu").addEventListener("click", () => showView("menu"));
@@ -543,6 +575,20 @@
     alert("本地记录已清空");
   });
 
+  /* ---------- 谱面分享口令导入 ---------- */
+  $("btn-share-import").addEventListener("click", () => {
+    const code = prompt("粘贴朋友发来的谱面口令（含 KD1- 开头）：");
+    if (!code) return;
+    try {
+      const song = SongLib.shareDecode(code);
+      SongLib.CustomStore.add(song);
+      refresh();
+      alert("已导入谱面《" + song.title + "》。在曲库卡片点「编辑谱面」，给谱面配上 BGM（朋友发来的音频文件），即可游玩。");
+    } catch (e) {
+      alert("口令无效：" + (e && e.message ? e.message : e));
+    }
+  });
+
   /* ---------- 保存到本地文件夹（File System Access API） ---------- */
   $("btn-dir").addEventListener("click", async () => {
     if (!window.showDirectoryPicker) {
@@ -576,6 +622,15 @@
   $("btn-clear").addEventListener("click", () => Editor.clear());
   $("btn-save").addEventListener("click", () => Editor.save());
   $("btn-export").addEventListener("click", () => Editor.exportJSON());
+  $("btn-share").addEventListener("click", async () => {
+    try {
+      const code = Editor.share();
+      await copyText(code);
+      alert("分享口令已复制。把口令和 BGM 文件一起发给朋友，对方在曲库点「粘贴谱面口令」即可导入。");
+    } catch (e) {
+      alert("生成口令失败：" + (e && e.message ? e.message : e));
+    }
+  });
   $("btn-ed-audio").addEventListener("click", () => $("ed-audio-file").click());
   $("btn-autogen").addEventListener("click", () => Editor.autoGen());
   $("ed-audio-file").addEventListener("change", (e) => {
