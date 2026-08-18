@@ -79,12 +79,16 @@
   let barLines = [];              // 每小节辅助下落线
   let avatarTimer = null;
   let pausedAt = 0;            // 暂停时刻的歌曲时间
+  let preNoteIdx = 0;          // 预创建音符进度（分批，避免一次性卡顿）
+  let preLineIdx = 0;
   let stats = { score: 0, combo: 0, maxCombo: 0, perfect: 0, good: 0, miss: 0 };
 
-  function judgeYpx() {
+  let judgeYCache = 300;
+  function recalcJudgeY() {
     const area = document.querySelector(".play-area");
-    return area ? area.clientHeight * JUDGE_LINE_RATIO : 300;
+    judgeYCache = area ? area.clientHeight * JUDGE_LINE_RATIO : 300;
   }
+  function judgeYpx() { return judgeYCache; }
 
   function loadSong(songObj) {
     song = songObj;
@@ -126,6 +130,7 @@
     const calMs = (window.SongLib && window.SongLib.Settings) ? window.SongLib.Settings.calMs : 0;
     offset = songOffset + calMs / 1000;   /* 判定时间轴 = 歌曲偏移 + 玩家校准偏移 */
     approach = (window.SongLib && window.SongLib.Settings) ? (window.SongLib.Settings.noteSpeed || APPROACH) : APPROACH;
+    recalcJudgeY();
     pxPerSec = judgeYpx() / approach;
     notes = song.notes.slice().sort((a, b) => a.time - b.time || a.lane - b.lane).map((n) => ({
       time: n.time, lane: n.lane, midi: n.midi, dur: n.dur || 0,
@@ -182,7 +187,30 @@
       }
     }, 25);
 
+    /* 预创建全部音符与辅助线（分批、初始隐藏），避免游戏中途创建 DOM 卡顿 */
+    precreateAll();
+
     raf = requestAnimationFrame(tick);
+  }
+
+  /* 分批预创建音符与辅助线：每帧最多跑 8ms，首个音符落下前（约 1.3s）完成 */
+  function precreateAll() {
+    preNoteIdx = 0;
+    preLineIdx = 0;
+    const step = () => {
+      const t0 = performance.now();
+      while (preNoteIdx < notes.length && performance.now() - t0 < 8) precreateNoteEl(notes[preNoteIdx++]);
+      const area = document.querySelector(".play-area");
+      while (preLineIdx < barLines.length && performance.now() - t0 < 8) {
+        const b = barLines[preLineIdx++];
+        const d = document.createElement("div");
+        d.className = "beat-line pre";
+        area.appendChild(d);
+        b.el = d;
+      }
+      if (preNoteIdx < notes.length || preLineIdx < barLines.length) requestAnimationFrame(step);
+    };
+    step();
   }
 
   function elapsed() {
@@ -196,21 +224,18 @@
 
     /* 每小节辅助线下落 */
     for (const b of barLines) {
-      if (!b.el && now >= b.time - approach) {
-        const d = document.createElement("div");
-        d.className = "beat-line";
-        document.querySelector(".play-area").appendChild(d);
-        b.el = d;
-      }
       if (!b.el) continue;
+      if (b.el.classList.contains("pre") && now >= b.time - approach) b.el.classList.remove("pre");
       const p = Math.max(0, Math.min(1.05, (now - (b.time - approach)) / approach));
-      b.el.style.top = p * jy + "px";
+      b.el.style.transform = "translateY(" + (p * jy) + "px)";
       if (p > 1) { b.el.remove(); b.el = null; }
     }
 
     for (const n of notes) {
-      if (!n.el && now >= n.time - approach) spawnNoteEl(n);
+      /* 兜底：分批预创建未赶上时同步创建（首个音符前必然已完成，一般不会走到） */
+      if (!n.el && !n.judged && now >= n.time - approach) precreateNoteEl(n);
       if (!n.el) continue;
+      if (n.el.classList.contains("pre") && now >= n.time - approach) n.el.classList.remove("pre");
 
       if (n.holding) {
         /* 长按：底部亮头钉在判定线上，条向上缩短 */
@@ -220,13 +245,14 @@
         } else {
           const remain = Math.max(0, 1 - (now - n.time) / n.dur);
           const h = Math.max(10, pxPerSec * n.dur * remain);
-          n.el.style.top = (jy - h) + "px";
+          n.el.style.transform = "translateX(-50%) translateY(" + (jy - h) + "px)";
           n.el.style.height = h + "px";
         }
       } else {
         const p = Math.max(0, Math.min(1.05, (now - (n.time - approach)) / approach));
         /* 底部亮头在下：元素顶端 = 头位置 - 条长 */
-        n.el.style.top = (p * jy - pxPerSec * n.dur) + "px";
+        const y = p * jy - pxPerSec * n.dur;
+        n.el.style.transform = (n.dur > 0 ? "translateX(-50%)" : "translate(-50%, -50%)") + " translateY(" + y + "px)";
       }
 
       /* 自动漏判 */
@@ -254,16 +280,16 @@
     raf = requestAnimationFrame(tick);
   }
 
-  function spawnNoteEl(n) {
+  function precreateNoteEl(n) {
     const d = document.createElement("div");
-    d.className = "note" + (n.dur > 0 ? " hold" : "");
-    d.style.top = "0px";
+    d.className = "note" + (n.dur > 0 ? " hold" : "") + " pre";
     if (n.dur > 0) {
       /* 条从底部亮头向上延伸，头初始在轨道顶部 */
       d.style.height = pxPerSec * n.dur + "px";
-      d.style.top = (-pxPerSec * n.dur) + "px";
+      d.style.transform = "translateX(-50%) translateY(-" + (pxPerSec * n.dur) + "px)";
     } else {
       d.textContent = "·";
+      d.style.transform = "translate(-50%, -50%)";
     }
     /* 双押音符套金边 */
     if (doubleTimes[n.time]) d.classList.add("double");
@@ -464,8 +490,19 @@
         n.holding = false;
       }
     }
+    /* 重建回退点之后的辅助线（已过的移除） */
     document.querySelectorAll(".beat-line").forEach((x) => x.remove());
-    barLines.forEach((b) => { b.el = null; });
+    const area = document.querySelector(".play-area");
+    barLines.forEach((b) => {
+      if (b.time >= resumeTime - approach - 0.01) {
+        const d = document.createElement("div");
+        d.className = "beat-line pre";
+        area.appendChild(d);
+        b.el = d;
+      } else {
+        b.el = null;
+      }
+    });
     held = [false, false];
     raf = requestAnimationFrame(tick);
     const ov = document.getElementById("pause-overlay");
@@ -516,6 +553,9 @@
     if (k === "j" || k === "k" || k === "l" || k === ";") return 1;
     return -1;
   }
+
+  /* 窗口/地址栏变化时重算判定线位置 */
+  window.addEventListener("resize", recalcJudgeY);
 
   /* 预热：预加载角色图 + 音频上下文，减少进谱面首帧卡顿 */
   function warmup() {

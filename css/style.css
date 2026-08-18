@@ -297,6 +297,7 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 24px 28
   background: radial-gradient(circle at 34% 30%, rgba(255,255,255,.4), rgba(255,91,160,.25) 55%, rgba(11,14,26,.92));
   box-shadow: 0 0 14px rgba(255,91,160,.55), inset 0 0 9px rgba(255,91,160,.45);
 }
+.note.pre, .beat-line.pre { opacity: 0; }
 .note.hit { animation: pop .25s ease-out forwards; }
 .note.missed { opacity: .15; }
 
